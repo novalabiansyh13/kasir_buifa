@@ -7,16 +7,6 @@ use CodeIgniter\Model;
 class BarangModel extends Model
 {
     protected $table = 'barang as a';
-
-    protected $primaryKey = 'id_barang';
-
-    protected $allowedFields = [
-        'nama_barang',
-        'harga_beli',
-        'harga_jual',
-        'margin',
-    ];
-
     public function __construct()
     {
         parent::__construct();
@@ -24,36 +14,37 @@ class BarangModel extends Model
         $this->builder = $this->db->table($this->table);
     }
 
-    // Kolom yang bisa di-search datatable (null = tidak bisa dicari)
     public function searchable()
     {
         return [
-            null,               // No
-            'a.nama_barang',    // Nama Barang
-            'a.harga_beli',     // Harga Beli
-            'a.harga_jual',     // Harga Jual
-            'a.margin',         // Margin
-            null,               // Action
+            null,
+            'a.nama_barang',
+            'b.categoryname',
+            'a.harga_beli',
+            'a.harga_jual',
+            'a.margin',
+            null,
         ];
     }
 
-    // Query untuk datatable (return BUILDER, bukan hasil)
     public function getBarang()
     {
-        return $this->builder->select('a.*');
+        return $this->builder
+            ->select('a.*, b.categoryname')
+            ->join('mscategory as b', 'b.categoryid = a.categoryid', 'left');
     }
 
-    // Ambil satu baris
     public function getOne($id = '')
     {
-        $x = $this->builder->select('a.*');
+        $x = $this->builder
+            ->select('a.*, b.categoryname')
+            ->join('mscategory as b', 'b.categoryid = a.categoryid', 'left');
         if ($id != '') {
             $x->where('a.id_barang', $id);
         }
         return $x->get()->getRowArray();
     }
 
-    // Hitung margin otomatis sebelum insert/update
     public function hitungMargin(array &$data)
     {
         if (isset($data['harga_jual'], $data['harga_beli'])) {
@@ -61,7 +52,6 @@ class BarangModel extends Model
         }
     }
 
-    // CRUD
     public function store($data)
     {
         return $this->builder->insert($data);
@@ -77,15 +67,21 @@ class BarangModel extends Model
         return $this->builder->delete(['id_barang' => $id]);
     }
 
-    // Search untuk select2 / autocomplete
-    public function getSelect($search = '')
+    public function getSelect($search = '', $categoryid = '')
     {
-        $cari = strtolower($search);
-        return $this->builder
-            ->select('a.id_barang, a.nama_barang, a.harga_beli, a.harga_jual, a.margin')
-            ->where("(lower(a.nama_barang) like '%" . $cari . "%')", null, false)
-            ->limit(15)
-            ->orderBy('a.nama_barang')
+        $cari = strtolower(trim($search));
+        $x = $this->builder
+            ->select('a.id_barang, a.nama_barang, a.harga_beli, a.harga_jual, a.margin, a.categoryid, b.categoryname')
+            ->join('mscategory as b', 'b.categoryid = a.categoryid', 'left');
+
+        if (!empty($categoryid)) {
+            $x->where('a.categoryid', $categoryid);
+        }
+        if ($cari !== '') {
+            $x->where("(lower(a.nama_barang) like '%" . $cari . "%' or lower(b.categoryname) like '%" . $cari . "%')", null, false);
+        }
+        return $x->limit(25)
+            ->orderBy('a.nama_barang', 'ASC')
             ->get()
             ->getResultArray();
     }

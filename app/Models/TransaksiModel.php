@@ -7,15 +7,6 @@ use CodeIgniter\Model;
 class TransaksiModel extends Model
 {
     protected $table = 'transaksi as a';
-
-    protected $primaryKey = 'id_transaksi';
-
-    protected $allowedFields = [
-        'tanggal_transaksi',
-        'total_bayar',
-        'total_margin',
-    ];
-
     public function __construct()
     {
         parent::__construct();
@@ -23,19 +14,17 @@ class TransaksiModel extends Model
         $this->builder = $this->db->table($this->table);
     }
 
-    // Kolom yang bisa di-search datatable (null = tidak bisa dicari)
     public function searchable()
     {
         return [
-            null,                 // No
-            'a.jam',              // Jam
-            'a.detail_barang',    // Detail Barang
-            'a.total_bayar',      // Total Bayar
-            'a.total_margin',     // Margin
+            null,
+            'a.jam',
+            'a.detail_barang',
+            'a.total_bayar',
+            'a.total_margin',
         ];
     }
 
-    // Query rekap hari ini (return BUILDER dari subquery agar alias bisa di-search/order)
     public function getRekap()
     {
         $sub = $this->db->table('transaksi t')
@@ -48,7 +37,6 @@ class TransaksiModel extends Model
         return $this->db->table('(' . $sub->getCompiledSelect() . ') as a');
     }
 
-    // Ringkasan akumulasi hari ini (untuk tambahan datatable)
     public function getRingkasanHariIni()
     {
         $row = $this->db->query(
@@ -64,5 +52,15 @@ class TransaksiModel extends Model
     public function store($data)
     {
         return $this->builder->insert($data);
+    }
+
+    public function edit($data, $id)
+    {
+        return $this->builder->update($data, ['id_transaksi' => $id]);
+    }
+
+    public function destroy($id)
+    {
+        return $this->builder->delete(['id_transaksi' => $id]);
     }
 }

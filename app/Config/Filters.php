@@ -11,6 +11,9 @@ use CodeIgniter\Filters\Honeypot;
 use CodeIgniter\Filters\InvalidChars;
 use CodeIgniter\Filters\PageCache;
 use CodeIgniter\Filters\PerformanceMetrics;
+use App\Filters\CheckAccess;
+use App\Filters\IsLogin;
+use App\Filters\IsNotLogin;
 use CodeIgniter\Filters\SecureHeaders;
 
 class Filters extends BaseFilters
@@ -34,6 +37,11 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
+        'auth'          => CheckAccess::class,
+        'noauth'        => IsLogin::class,
+        'isLogin'       => IsLogin::class,
+        'isNotLogin'    => IsNotLogin::class,
+        'checkAccess'   => CheckAccess::class,
     ];
 
     /**
@@ -65,15 +73,12 @@ class Filters extends BaseFilters
      * List of filter aliases that are always
      * applied before and after every request.
      *
-     * @var array{
-     *     before: array<string, array{except: list<string>|string}>|list<string>,
-     *     after: array<string, array{except: list<string>|string}>|list<string>
-     * }
+     * @var array<string, array<string, array<string, string>>>|array<string, list<string>>
      */
     public array $globals = [
         'before' => [
             // 'honeypot',
-            'csrf',
+            // 'csrf',
             // 'invalidchars',
         ],
         'after' => [

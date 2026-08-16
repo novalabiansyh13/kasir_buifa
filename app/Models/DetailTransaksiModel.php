@@ -8,18 +8,6 @@ class DetailTransaksiModel extends Model
 {
     protected $table = 'detail_transaksi as a';
 
-    protected $primaryKey = 'id_detail';
-
-    protected $allowedFields = [
-        'id_transaksi',
-        'id_barang',
-        'jumlah',
-        'harga_jual_satuan',
-        'margin_satuan',
-        'subtotal_harga',
-        'subtotal_margin',
-    ];
-
     public function __construct()
     {
         parent::__construct();

@@ -6,7 +6,6 @@ use CodeIgniter\Model;
 
 class Globalmodel extends Model
 {
-    // Cek apakah value masih direferensikan oleh tabel lain (UNION query)
     public static function validateData(array $tables)
     {
         $db = db_connect();

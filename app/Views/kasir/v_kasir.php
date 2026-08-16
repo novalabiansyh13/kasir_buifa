@@ -1,166 +1,184 @@
 <?= $this->include('template/v_header') ?>
 <?= $this->include('template/v_appbar') ?>
-<div class="main-content content margin-t-4">
-<div class="row g-3">
-
-    <!-- ══════════════════════════════════════════════════════════════════════
-         KOLOM KIRI: Form Input Transaksi
-    ═══════════════════════════════════════════════════════════════════════ -->
-    <div class="col-lg-5 col-xl-4">
-
-        <div class="card h-100">
-            <div class="card-header bg-success text-white d-flex align-items-center gap-2">
-                <i class="bi bi-cart-plus fs-5"></i>
-                <span>Input Transaksi</span>
+<div class="space-y-4">
+    <div class="card p-4 bg-gradient-to-r from-primary-700 via-primary to-primary-600 text-white flex flex-col sm:flex-row items-center justify-between gap-3 border border-primary-600 shadow-md rounded-[14px]">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-white/20 text-white flex items-center justify-center text-xl shrink-0">
+                <i class="bi bi-receipt-cutoff"></i>
             </div>
-            <div class="card-body">
-
-                <!-- Pilih Barang (Select2) -->
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Pilih Barang</label>
-                    <select id="selectBarang" class="form-select">
-                        <option value="">— Pilih barang —</option>
-                    </select>
+            <div>
+                <div class="font-bold text-xs text-white flex items-center gap-2">
+                    <span>Terminal POS &bull; Kasir Utama</span>
+                    <span class="badge bg-white/20 text-white text-[10px] py-0.5 px-2 rounded-full font-mono">Kasir: Online</span>
                 </div>
-
-                <div class="row g-2 mb-3">
-                    <div class="col-7">
-                        <label class="form-label fw-semibold">Harga Jual (Rp)</label>
-                        <input type="number" id="inputHarga" class="form-control" placeholder="0" min="0" readonly>
+                <span class="text-[11px] text-white/90">Sistem Transaksi Kasir Instan & Manajemen Penjualan Toko</span>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-white/20 text-white flex items-center gap-1.5">
+                <i class="bi bi-person-check-fill text-cyan-200"></i> <?= esc(getSession('fullname')) ?>
+            </span>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <div class="lg:col-span-5 space-y-4">
+            <div class="card shadow-sm border border-slate-200/80 dark:border-slate-700 rounded-[14px] overflow-hidden bg-white dark:bg-slate-800">
+                <div class="bg-[#0284c7] text-white flex items-center justify-between px-4 py-3 font-bold text-xs sm:text-sm">
+                    <span class="flex items-center gap-2">
+                        <i class="bi bi-cart-plus-fill text-base"></i> Input Transaksi Kasir
+                    </span>
+                    <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-normal">Form Transaksi Kasir</span>
+                </div>
+                <div class="p-4 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                            Filter Kategori <span class="text-[10px] font-normal text-slate-400 dark:text-slate-500">(Opsional)</span>
+                        </label>
+                        <select id="selectCategory" class="w-full">
+                            <option value=""></option>
+                        </select>
                     </div>
-                    <div class="col-5">
-                        <label class="form-label fw-semibold">Jumlah</label>
-                        <input type="number" id="inputJumlah" class="form-control" value="1" min="1">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">Pilih Barang / Produk</label>
+                        <select id="selectBarang" class="w-full">
+                            <option value=""></option>
+                        </select>
                     </div>
-                </div>
-
-                <button type="button" id="btnTambahItem" class="btn btn-success w-100 mb-3">
-                    <i class="bi bi-plus-circle me-1"></i>Tambah ke Keranjang
-                </button>
-
-                <hr>
-
-                <!-- Keranjang Belanja -->
-                <h6 class="fw-bold mb-2"><i class="bi bi-cart3 me-1"></i>Keranjang</h6>
-
-                <div id="cartEmpty" class="text-muted text-center py-3 small">
-                    Keranjang kosong. Pilih barang di atas.
-                </div>
-
-                <table class="table table-sm table-hover mb-2 d-none" id="cartTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Barang</th>
-                            <th class="text-end">Harga</th>
-                            <th class="text-center">Qty</th>
-                            <th class="text-end">Subtotal</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="cartBody"></tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="3" class="text-end">Total Bayar:</td>
-                            <td class="text-end text-success" id="cartTotal">Rp 0</td>
-                            <td></td>
-                        </tr>
-                    </tfoot>
-                </table>
-
-                <!-- Form Submit -->
-                <form id="formTransaksi" style="padding-inline: 0px;">
-                    <input type="hidden" name="items" id="hiddenItems">
-                    <input type="hidden" id="csrf_token_form" name="<?= csrf_token() ?>">
-                    <button type="submit" id="btnSimpan" class="btn btn-primary w-100 disabled">
-                        <i class="bi bi-save2 me-1"></i>Simpan Transaksi
+                    <div class="grid grid-cols-12 gap-2">
+                        <div class="col-span-7">
+                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">Harga Jual (Rp)</label>
+                            <input type="number" id="inputHarga" class="form-control text-xs font-mono bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300" placeholder="0" min="0" readonly>
+                        </div>
+                        <div class="col-span-5">
+                            <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">Jumlah (Qty)</label>
+                            <input type="number" id="inputJumlah" class="form-control text-xs text-center font-bold" value="1" min="1">
+                        </div>
+                    </div>
+                    <button type="button" id="btnTambahItem" class="btn btn-primary w-full flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold shadow-xs">
+                        <i class="bi bi-plus-circle-fill text-sm"></i> Tambah ke Keranjang
                     </button>
-                </form>
-
-            </div><!-- /card-body -->
-        </div><!-- /card -->
-
-    </div><!-- /col-lg-5 -->
-
-    <!-- ══════════════════════════════════════════════════════════════════════
-         KOLOM KANAN: Rekap Harian
-    ═══════════════════════════════════════════════════════════════════════ -->
-    <div class="col-lg-7 col-xl-8">
-
-        <!-- Ringkasan Hari Ini -->
-        <div class="row g-3 mb-3">
-            <div class="col-sm-6">
-                <div class="card text-center border-0 bg-success text-white">
-                    <div class="card-body py-3">
-                        <div class="small mb-1 opacity-75"><i class="bi bi-cash-coin me-1"></i>Total Penjualan Hari Ini</div>
-                        <div class="fs-4 fw-bold" id="summaryPenjualan">Rp 0</div>
+                    <div class="border-t border-slate-200 dark:border-slate-700 my-2"></div>
+                    <div class="flex items-center justify-between">
+                        <h6 class="font-bold text-xs text-slate-900 dark:text-white flex items-center gap-1.5 mb-0">
+                            <i class="bi bi-bag-check-fill text-sky-600 dark:text-cyan-400 text-sm"></i> Keranjang Belanja
+                        </h6>
+                        <span id="cartCountBadge" class="badge badge-soft-primary badge-xs">0 Item</span>
                     </div>
-                </div>
-            </div>
-            <div class="col-sm-6">
-                <div class="card text-center border-0 bg-warning">
-                    <div class="card-body py-3">
-                        <div class="small mb-1 text-dark opacity-75"><i class="bi bi-graph-up-arrow me-1"></i>Total Margin / Untung Hari Ini</div>
-                        <div class="fs-4 fw-bold text-dark" id="summaryMargin">Rp 0</div>
+                    <div id="cartEmpty" class="text-slate-500 dark:text-slate-400 text-center py-6 text-xs bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                        Keranjang masih kosong. Pilih barang di atas lalu klik Tambah.
                     </div>
+                    <div id="cartContainer" class="hidden overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+                        <table class="w-full text-xs text-left" id="cartTable">
+                            <thead class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 uppercase text-[10px] font-bold border-b border-slate-200 dark:border-slate-700">
+                                <tr>
+                                    <th class="py-2.5 px-3">Barang</th>
+                                    <th class="py-2.5 px-3 text-center">Harga</th>
+                                    <th class="py-2.5 px-3 text-center">Qty</th>
+                                    <th class="py-2.5 px-3 text-center">Subtotal</th>
+                                    <th class="py-2.5 px-2 text-center"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="cartBody" class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-900 dark:text-slate-100"></tbody>
+                            <tfoot class="bg-slate-50 dark:bg-slate-900 font-bold border-t border-slate-200 dark:border-slate-700">
+                                <tr>
+                                    <td colspan="3" class="py-2.5 px-3 text-right text-slate-700 dark:text-slate-300">Total Bayar:</td>
+                                    <td class="py-2.5 px-3 text-right text-sky-600 dark:text-cyan-400 text-sm font-bold font-mono" id="cartTotal">Rp 0</td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <form id="formTransaksi" class="pt-2">
+                        <input type="hidden" name="items" id="hiddenItems">
+                        <input type="hidden" id="csrf_token_form" name="<?= csrf_token() ?>">
+                        <button type="submit" id="btnSimpan" class="btn btn-primary w-full py-3 text-xs font-bold flex items-center justify-center gap-2 shadow-md opacity-50 cursor-not-allowed" disabled>
+                            <i class="bi bi-wallet2 text-base"></i> Simpan Transaksi
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
 
-        <!-- Tabel Rekap Transaksi Harian (server-side datatable) -->
-        <div class="card">
-            <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
-                <span><i class="bi bi-journal-text me-1"></i>Rekap Transaksi Hari Ini</span>
-                <button class="btn btn-sm btn-outline-light" id="btnRefresh" title="Muat ulang data">
-                    <i class="bi bi-arrow-clockwise"></i>
-                </button>
+        <div class="lg:col-span-7 space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="card p-4 shadow-sm border border-slate-200/80 dark:border-slate-700 rounded-[14px] bg-white dark:bg-slate-800 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">TOTAL PENJUALAN HARI INI</span>
+                        <span class="badge badge-soft-primary badge-xs">Live Kasir</span>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-mono tracking-tight my-1" id="summaryPenjualan">Rp 0</div>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400">Total omset kotor transaksi hari ini</span>
+                </div>
+                <div class="card p-4 shadow-sm border border-slate-200/80 dark:border-slate-700 rounded-[14px] bg-white dark:bg-slate-800 flex flex-col justify-between">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">TOTAL MARGIN / UNTUNG</span>
+                        <span class="badge badge-soft-warning badge-xs">Profit Laba</span>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-extrabold text-amber-600 dark:text-amber-400 font-mono tracking-tight my-1" id="summaryMargin">Rp 0</div>
+                    <span class="text-[10px] text-slate-500 dark:text-slate-400">Total laba keuntungan (Jual &minus; Beli)</span>
+                </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover table-striped align-middle mb-0 table-rekap" id="tabelRekap" style="width: 100%;">
-                        <thead class="table-dark">
+            <div class="card shadow-sm border border-slate-200/80 dark:border-slate-700 rounded-[14px] overflow-hidden bg-white dark:bg-slate-800">
+                <div class="bg-[#0284c7] text-white flex items-center justify-between px-4 py-3 font-bold text-xs sm:text-sm">
+                    <span class="flex items-center gap-2">
+                        <i class="bi bi-journal-text text-base"></i> Rekap Transaksi Hari Ini
+                    </span>
+                    <button type="button" id="btnRefresh" class="btn btn-soft-secondary btn-sm flex items-center gap-1 text-xs" title="Muat ulang data">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh Data
+                    </button>
+                </div>
+
+                <div class="p-4 overflow-x-auto">
+                    <table class="w-full text-xs text-left text-slate-800 dark:text-slate-200 border-collapse table-rekap" id="tabelRekap" style="width: 100%;">
+                        <thead class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold border-b border-slate-200 dark:border-slate-700">
                             <tr>
-                                <th>No</th>
-                                <th style="min-width:70px">Jam</th>
-                                <th>Detail Barang</th>
-                                <th class="text-end" style="min-width:130px">Total Bayar</th>
-                                <th class="text-end" style="min-width:110px">Margin</th>
+                                <th class="py-3 px-3 text-center">No</th>
+                                <th class="py-3 px-3 text-center">Jam</th>
+                                <th class="py-3 px-3 text-center">Detail Barang</th>
+                                <th class="py-3 px-3 text-center" style="min-width: 120px;">Total Bayar</th>
+                                <th class="py-3 px-3 text-center" style="min-width: 100px;">Margin</th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
-                        <tfoot class="summary-row">
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-900 dark:text-slate-100"></tbody>
+                        <tfoot class="bg-slate-50 dark:bg-slate-900 font-bold border-t border-slate-200 dark:border-slate-700">
                             <tr>
-                                <td colspan="3" class="text-end">
-                                    <i class="bi bi-calculator me-1"></i>TOTAL HARI INI:
-                                </td>
-                                <td class="text-end text-success" id="footerPenjualan">Rp 0</td>
-                                <td class="text-end text-warning" id="footerMargin">Rp 0</td>
+                                <td colspan="3" class="py-3 px-3 text-start text-slate-700 dark:text-slate-300"><i class="bi bi-calculator me-1"></i>TOTAL HARI INI:</td>
+                                <td class="py-3 px-3 text-center text-sky-600 dark:text-cyan-400 font-bold text-sm font-mono" id="footerPenjualan">Rp 0</td>
+                                <td class="py-3 px-3 text-center text-amber-600 dark:text-amber-400 font-bold text-sm font-mono" id="footerMargin">Rp 0</td>
                             </tr>
                         </tfoot>
                     </table>
-                </div><!-- /table-responsive -->
-            </div><!-- /card-body -->
-        </div><!-- /card -->
-
-    </div><!-- /col-lg-7 -->
-
-</div><!-- /row -->
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <?= $this->include('template/v_footer') ?>
 <script>
-/* ─────────────────────────────────────────────────────────────────────────────
-   Kasir – client-side cart logic + rekap datatable
-──────────────────────────────────────────────────────────────────────────── */
-
 var cart = [];
 
-$(document).ready(function() {
+function initSelectBarang(catId = '') {
+    if ($('#selectBarang').hasClass("select2-hidden-accessible")) {
+        $('#selectBarang').select2('destroy');
+    }
+    $('#selectBarang').empty().append('<option value=""></option>');
+    generateSelect2('#selectBarang', '', '<?= getURL('barang/getbarang') ?>', 'Cari nama barang...', '100%', 0, true, { categoryid: catId });
+}
 
-    // ── Select2 pilih barang (AJAX) ─────────────────────────────────────────
-    generateSelect2('#selectBarang', '', '<?= getURL('barang/getbarang') ?>', 'Pilih barang', '100%', 5, true, {});
+$(document).ready(function() {
+    generateSelect2('#selectCategory', '', '<?= getURL('barang/getcategory') ?>', 'Semua Kategori (Filter)...', '100%', 0, true, {});
+    initSelectBarang();
+
+    $('#selectCategory').on('change', function() {
+        var catId = $(this).val() || '';
+        $('#inputHarga').val('');
+        $('#inputJumlah').val('1');
+        initSelectBarang(catId);
+    });
 
     $('#selectBarang').on('change', function() {
         var data = $(this).select2('data');
-        if (data.length > 0 && data[0].harga !== undefined) {
+        if (data && data.length > 0 && data[0].harga !== undefined) {
             $('#inputHarga').val(data[0].harga);
         } else {
             $('#inputHarga').val('');
@@ -174,155 +192,198 @@ $(document).ready(function() {
     $('#formTransaksi').on('submit', function(e) {
         e.preventDefault();
         if (cart.length === 0) {
-            showError('Keranjang masih kosong.');
+            showError('Keranjang belanja masih kosong.');
             return;
         }
-        if (!confirm('Simpan transaksi ini?')) return;
+        Swal.fire({
+            title: 'Simpan Transaksi Kasir?',
+            text: 'Pastikan seluruh item keranjang dan jumlah sudah sesuai.',
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: false,
+            confirmButtonColor: '#0284c7',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: '<i class="bi bi-check-circle-fill"></i> Ya, Simpan Transaksi',
+            cancelButtonText: 'Batal',
+            customClass: {
+                popup: 'hyperui-swal',
+                title: 'hyperui-swal-title',
+                htmlContainer: 'hyperui-swal-text'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                prosesSimpanTransaksi();
+            }
+        });
+    });
 
+    function prosesSimpanTransaksi() {
         var csrf = decrypter($("#csrf_token").val());
         $("#csrf_token_form").val(csrf);
-
-        var old_html = $('#btnSimpan').html();
-        $('#btnSimpan').html('<span class="spinner-border spinner-border-sm me-1"></span>');
-        $('#btnSimpan').attr('disabled', 'disabled');
-
+        var btn = $('#btnSimpan');
+        var old_html = btn.html();
+        btn.html('<i class="bi bi-arrow-repeat animate-spin text-base"></i> Menyimpan...').attr('disabled', 'disabled');
         $.ajax({
             type: 'post',
             url: '<?= getURL('kasir/simpan') ?>',
             data: $('#formTransaksi').serialize(),
             dataType: 'json',
             success: function(response) {
-                $('#btnSimpan').html(old_html);
-                $('#btnSimpan').removeAttr('disabled');
-                $("#csrf_token").val(encrypter(response.csrfToken));
+                btn.html(old_html);
+                if (response.csrfToken) {
+                    $("#csrf_token").val(encrypter(response.csrfToken));
+                }
                 $("#csrf_token_form").val('');
-                showNotif((response.sukses == 1 ? 'success' : 'error'), response.pesan);
                 if (response.sukses == 1) {
-                    cart.length = 0;
+                    cart = [];
                     renderCart();
-                    $('#inputHarga').val('');
-                    $('#inputJumlah').val(1);
-                    if (tbl_rekap !== null) tbl_rekap.ajax.reload();
+                    showSuccess(response.pesan || 'Transaksi berhasil disimpan!');
+                    if (tbl_rekap !== null) {
+                        tbl_rekap.ajax.reload();
+                    }
+                } else {
+                    btn.removeAttr('disabled');
+                    showError(response.pesan || 'Gagal menyimpan transaksi.');
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                $('#btnSimpan').html(old_html);
-                $('#btnSimpan').removeAttr('disabled');
-                showError(thrownError + ", please contact administrator for the further");
+                btn.html(old_html).removeAttr('disabled');
+                showError(thrownError || 'Terjadi kesalahan koneksi.');
             }
         });
+    }
+
+    tbl_rekap = $('#tabelRekap').DataTable({
+        serverSide: true,
+        destroy: true,
+        autoWidth: false,
+        ajax: {
+            url: '<?= getURL('kasir/table') ?>',
+            type: 'post',
+            dataType: 'json',
+            data: function(param) {
+                param["<?= csrf_token() ?>"] = decrypter($("#csrf_token").val());
+                return param;
+            },
+            dataSrc: function(json) {
+                if (json.csrfToken) {
+                    $("#csrf_token").val(encrypter(json.csrfToken));
+                }
+                var totalPenjualan = 0;
+                var totalMargin = 0;
+                if (json.tambahan) {
+                    totalPenjualan = json.tambahan.total_penjualan || 0;
+                    totalMargin = json.tambahan.total_margin || 0;
+                }
+                $('#summaryPenjualan').text(formatRupiah(totalPenjualan));
+                $('#summaryMargin').text(formatRupiah(totalMargin));
+                $('#footerPenjualan').text(formatRupiah(totalPenjualan));
+                $('#footerMargin').text(formatRupiah(totalMargin));
+                return json.data || [];
+            }
+        },
+        columns: [
+            { data: 0, className: 'text-center' },
+            { data: 1, className: 'text-center' },
+            { data: 2, className: 'text-start' },
+            { data: 3, className: 'text-center font-mono' },
+            { data: 4, className: 'text-center font-mono' }
+        ]
     });
 
     $('#btnRefresh').on('click', function() {
-        if (tbl_rekap !== null) tbl_rekap.ajax.reload();
+        if (tbl_rekap) tbl_rekap.ajax.reload();
     });
-
-    // ── Rekap datatable (custom dataSrc update kartu ringkasan) ─────────────
-    if ($('.table-rekap').length) {
-        tbl_rekap = generateDatatable('.table-rekap', {
-            order: [[1, 'desc']],
-            ajax: {
-                url: '<?= getURL('kasir/table') ?>',
-                dataSrc: function(json) {
-                    if (json.tambahan) {
-                        var pj = json.tambahan.total_penjualan;
-                        var mg = json.tambahan.total_margin;
-                        if (pj !== undefined) {
-                            $("#summaryPenjualan").text(formatRupiah(pj));
-                            $("#footerPenjualan").text(formatRupiah(pj));
-                        }
-                        if (mg !== undefined) {
-                            $("#summaryMargin").text(formatRupiah(mg));
-                            $("#footerMargin").text(formatRupiah(mg));
-                        }
-                    }
-                    $("#csrf_token").val(encrypter(json.csrfToken));
-                    return json.data;
-                }
-            }
-        });
-    }
 });
 
 function tambahItem() {
-    var data = $('#selectBarang').select2('data');
-    if (data.length === 0 || !data[0].id) {
-        showError('Pilih barang terlebih dahulu.');
+    var selectData = $('#selectBarang').select2('data');
+    if (!selectData || selectData.length === 0 || !selectData[0].id) {
+        showError('Pilih barang terlebih dahulu!');
         return;
     }
-    var jumlah = parseInt($('#inputJumlah').val(), 10);
-    if (isNaN(jumlah) || jumlah < 1) {
-        showError('Jumlah harus minimal 1.');
+    var item = selectData[0];
+    var qty = parseInt($('#inputJumlah').val()) || 1;
+    var harga = parseFloat(item.harga) || 0;
+    if (qty <= 0) {
+        showError('Jumlah qty minimal 1.');
         return;
     }
-    var item = data[0];
-    var existing = cart.find(function(c) { return c.id_barang === item.id; });
-    if (existing) {
-        existing.jumlah += jumlah;
+    var existingIndex = cart.findIndex(c => c.id === item.id);
+    if (existingIndex > -1) {
+        cart[existingIndex].qty += qty;
+        cart[existingIndex].jumlah += qty;
+        cart[existingIndex].subtotal = cart[existingIndex].qty * cart[existingIndex].harga;
     } else {
         cart.push({
             id_barang: item.id,
-            nama: item.text,
-            harga: parseFloat(item.harga),
-            margin: parseFloat(item.margin),
-            jumlah: jumlah
+            id: item.id,
+            text: item.text,
+            harga: harga,
+            jumlah: qty,
+            qty: qty,
+            subtotal: qty * harga
         });
     }
-    renderCart();
     $('#selectBarang').val(null).trigger('change');
     $('#inputHarga').val('');
-    $('#inputJumlah').val(1);
+    $('#inputJumlah').val('1');
+    renderCart();
 }
 
 function renderCart() {
-    $('#cartBody').empty();
+    var tbody = $('#cartBody');
+    tbody.empty();
     var total = 0;
-    cart.forEach(function(item, idx) {
-        var subtotal = item.harga * item.jumlah;
-        total += subtotal;
-        $('#cartBody').append(
-            '<tr class="cart-item">' +
-            '<td>' + escHtml(item.nama) + '</td>' +
-            '<td class="text-end">' + formatRupiah(item.harga) + '</td>' +
-            '<td class="text-center">' +
-            '<input type="number" class="form-control form-control-sm text-center" style="width:60px;display:inline-block" value="' + item.jumlah + '" min="1" data-idx="' + idx + '">' +
-            '</td>' +
-            '<td class="text-end fw-semibold">' + formatRupiah(subtotal) + '</td>' +
-            '<td><button class="btn btn-sm btn-outline-danger p-0 px-1" data-hapus="' + idx + '" title="Hapus"><i class="bi bi-trash3"></i></button></td>' +
-            '</tr>'
-        );
+    var totalQty = 0;
+    if (cart.length === 0) {
+        $('#cartEmpty').removeClass('hidden');
+        $('#cartContainer').addClass('hidden');
+        $('#btnSimpan').addClass('opacity-50 cursor-not-allowed').prop('disabled', true);
+        $('#cartCountBadge').text('0 Item');
+        $('#cartTotal').text('Rp 0');
+        return;
+    }
+    $('#cartEmpty').addClass('hidden');
+    $('#cartContainer').removeClass('hidden');
+    $('#btnSimpan').removeClass('opacity-50 cursor-not-allowed').prop('disabled', false);
+    cart.forEach(function(item, index) {
+        total += item.subtotal;
+        totalQty += item.qty;
+        var row = `<tr>
+            <td class="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">${item.text}</td>
+            <td class="py-2.5 px-3 text-right text-slate-600 dark:text-slate-400 font-mono">${formatRupiah(item.harga)}</td>
+            <td class="py-2.5 px-3 text-center">
+                <input type="number" min="1" value="${item.qty}" onchange="updateQty(${index}, this.value)" class="form-control text-xs text-center py-0.5 px-1 w-14 inline-block font-bold">
+            </td>
+            <td class="py-2.5 px-3 text-right text-sky-600 dark:text-cyan-400 font-bold font-mono">${formatRupiah(item.subtotal)}</td>
+            <td class="py-2.5 px-2 text-center">
+                <button type="button" onclick="hapusItem(${index})" class="btn btn-soft-danger p-1 text-xs" title="Hapus item">
+                    <i class="bi bi-trash-fill"></i>
+                </button>
+            </td>
+        </tr>`;
+        tbody.append(row);
     });
     $('#cartTotal').text(formatRupiah(total));
-    $('#hiddenItems').val(JSON.stringify(cart.map(function(c) { return { id_barang: c.id_barang, jumlah: c.jumlah }; })));
-    if (cart.length > 0) {
-        $('#cartTable').removeClass('d-none');
-        $('#cartEmpty').addClass('d-none');
-        $('#btnSimpan').removeClass('disabled');
-    } else {
-        $('#cartTable').addClass('d-none');
-        $('#cartEmpty').removeClass('d-none');
-        $('#btnSimpan').addClass('disabled');
-    }
+    $('#hiddenItems').val(JSON.stringify(cart));
+    $('#cartCountBadge').text(totalQty + ' Item');
 }
 
-$(document).on('change', '#cartBody input[type=number]', function() {
-    var idx = $(this).data('idx');
-    var n = parseInt($(this).val(), 10);
-    if (n >= 1 && cart[idx]) {
-        cart[idx].jumlah = n;
-        renderCart();
+function updateQty(index, val) {
+    var qty = parseInt(val) || 1;
+    if (qty < 1) {
+        hapusItem(index);
+        return;
     }
-});
-
-$(document).on('click', '#cartBody button[data-hapus]', function() {
-    var idx = $(this).data('hapus');
-    cart.splice(idx, 1);
+    cart[index].qty = qty;
+    cart[index].jumlah = qty;
+    cart[index].subtotal = qty * cart[index].harga;
     renderCart();
-});
+}
 
-function escHtml(s) {
-    return String(s).replace(/[&<>"']/g, function(m) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
-    });
+function hapusItem(index) {
+    cart.splice(index, 1);
+    renderCart();
 }
 </script>
