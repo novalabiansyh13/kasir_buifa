@@ -101,6 +101,7 @@ _modules/*
 *.iml
 
 # NetBeans
+node_modules/
 /nbproject/
 /build/
 /nbbuild/
