@@ -63,6 +63,20 @@ $routes->group('user', function ($routes) {
     $routes->add('saverole', 'master\User::saveRole', $this->akses);
 });
 
+// menu
+$routes->group('menu', function ($routes) {
+    $routes->add('', 'master\Menu::index', $this->akses);
+    $routes->add('table', 'master\Menu::datatable', $this->akses);
+    $routes->add('form', 'master\Menu::forms', $this->akses);
+    $routes->add('form/(:any)', 'master\Menu::forms/$1', $this->akses);
+    $routes->add('add', 'master\Menu::addMenu', $this->akses);
+    $routes->add('update', 'master\Menu::updateMenu', $this->akses);
+    $routes->add('delete', 'master\Menu::deleteMenu', $this->akses);
+    $routes->add('sort', 'master\Menu::formSort', $this->akses);
+    $routes->add('saveorder', 'master\Menu::saveOrder', $this->akses);
+    $routes->add('getmenu', 'master\Menu::getMenu', $this->auth);
+});
+
 // kasir
 $routes->group('kasir', function ($routes) {
     $routes->add('', 'kasir\Kasir::index', $this->akses);

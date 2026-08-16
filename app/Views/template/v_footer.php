@@ -65,6 +65,27 @@
             </form>
         </div>
     </div>
+
+     <!-- Global AJAX Modal -->
+    <div id="globalModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-900/60 backdrop-blur-xs transition-opacity duration-200">
+        <div id="globalModalContainer" class="relative w-full max-w-lg bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200/80 dark:border-slate-700 overflow-hidden transform transition-all my-8">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-700/80 bg-slate-50/50 dark:bg-slate-800/50">
+                <h3 id="globalModalTitle" class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    Modal Title
+                </h3>
+                <button type="button" onclick="closeModal()" class="w-8 h-8 rounded-lg inline-flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors">
+                    <i class="bi bi-x-lg text-sm"></i>
+                </button>
+            </div>
+            <!-- Modal Body -->
+            <div id="globalModalBody" class="p-6 max-h-[calc(85vh-120px)] overflow-y-auto">
+                <div class="flex items-center justify-center py-12">
+                    <i class="bi bi-arrow-repeat animate-spin text-3xl text-sky-600 dark:text-cyan-400"></i>
+                </div>
+            </div>
+        </div>
+    </div>
     <input type="hidden" id="csrf_token" value="<?= base_encode(csrf_hash()) ?>">
     <script>
     var tbl = null;
@@ -310,6 +331,54 @@
                 }
             });
         });
+    });
+
+    function openModal(title, url, datas, modalSize) {
+        if (datas == undefined) datas = {};
+        if (modalSize == undefined) modalSize = 'max-w-lg';
+        $('#globalModalTitle').text(title || 'Form Modal');
+        var container = $('#globalModalContainer');
+        container.removeClass('max-w-xs max-w-sm max-w-md max-w-lg max-w-xl max-w-2xl max-w-3xl max-w-4xl max-w-5xl max-w-6xl');
+        container.addClass(modalSize);
+        $('#globalModalBody').html(`
+            <div class="flex flex-col items-center justify-center py-12 gap-3 text-slate-500 dark:text-slate-400">
+                <i class="bi bi-arrow-repeat animate-spin text-3xl text-sky-600 dark:text-cyan-400"></i>
+                <span class="text-xs font-medium">Memuat data form...</span>
+            </div>
+        `);
+        $('#globalModal').removeClass('hidden').addClass('flex');
+        datas["<?= csrf_token() ?>"] = decrypter($("#csrf_token").val());
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: datas,
+            success: function(response) {
+                if (typeof response === 'object' && response.csrfToken) {
+                    $("#csrf_token").val(encrypter(response.csrfToken));
+                }
+                var htmlContent = (typeof response === 'object' && response.html) ? response.html : response;
+                $('#globalModalBody').html(htmlContent);
+            },
+            error: function(xhr, status, error) {
+                $('#globalModalBody').html(`
+                    <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 text-xs">
+                        <div class="font-bold mb-1 flex items-center gap-1.5"><i class="bi bi-exclamation-triangle-fill"></i> Gagal Memuat Form</div>
+                        <div>${error || 'Terjadi kesalahan sistem saat memuat form.'}</div>
+                    </div>
+                `);
+            }
+        });
+    }
+
+    function closeModal() {
+        $('#globalModal').addClass('hidden').removeClass('flex');
+        $('#globalModalBody').empty();
+    }
+
+    $(document).on('click', '#globalModal', function(e) {
+        if ($(e.target).is('#globalModal')) {
+            closeModal();
+        }
     });
     </script>
 </body>

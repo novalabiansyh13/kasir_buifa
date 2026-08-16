@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Inisialisasi tema saat load
     const currentTheme = localStorage.getItem('theme') || 'dark';
     applyThemeUI(currentTheme === 'dark');
 
@@ -36,29 +35,122 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── Mobile Sidebar Toggle ────────────────────────────────────────────────
-    const toggleBtn = document.getElementById('mobile-toggle-btn') || document.getElementById('sidebar-toggle');
-    const sidebar = document.getElementById('sidebar') || document.getElementById('main-sidebar');
-    const backdrop = document.getElementById('sidebar-backdrop') || document.getElementById('sidebar-overlay');
+    // ── Sidebar Toggle (Desktop Mini Sidebar & Mobile Drawer) ────────────────
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+    const mobileToggleBtn = document.getElementById('mobile-toggle-btn');
+    const desktopReopenBtn = document.getElementById('desktop-sidebar-reopen-btn');
+    const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+    const sidebarChevronIcon = document.getElementById('sidebar-chevron-icon');
+    const sidebar = document.getElementById('sidebar');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    const mainWrapper = document.getElementById('main-wrapper');
 
-    if (toggleBtn && sidebar) {
-        toggleBtn.addEventListener('click', function(e) {
+    function isMobile() {
+        return window.innerWidth < 768;
+    }
+
+    function applyDesktopSidebarState(isCollapsed) {
+        if (!sidebar || !mainWrapper) return;
+        if (isCollapsed) {
+            sidebar.classList.add('sidebar-collapsed');
+            mainWrapper.classList.remove('md:pl-60');
+            mainWrapper.classList.add('md:pl-[72px]');
+            if (sidebarChevronIcon) {
+                sidebarChevronIcon.classList.remove('bi-chevron-left');
+                sidebarChevronIcon.classList.add('bi-chevron-right');
+            }
+        } else {
+            sidebar.classList.remove('sidebar-collapsed');
+            mainWrapper.classList.remove('md:pl-[72px]');
+            mainWrapper.classList.add('md:pl-60');
+            if (sidebarChevronIcon) {
+                sidebarChevronIcon.classList.remove('bi-chevron-right');
+                sidebarChevronIcon.classList.add('bi-chevron-left');
+            }
+        }
+    }
+
+    // Restore desktop sidebar state on load
+    if (!isMobile()) {
+        const isCollapsed = localStorage.getItem('sidebar_collapsed') === '1';
+        applyDesktopSidebarState(isCollapsed);
+    }
+
+    // Floating Attached Button on Sidebar Border
+    if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', function(e) {
             e.stopPropagation();
-            sidebar.classList.toggle('-translate-x-full');
-            if (backdrop) {
-                backdrop.classList.toggle('opacity-0');
-                backdrop.classList.toggle('pointer-events-none');
+            if (!isMobile()) {
+                const isCurrentlyCollapsed = sidebar.classList.contains('sidebar-collapsed');
+                const newCollapsed = !isCurrentlyCollapsed;
+                localStorage.setItem('sidebar_collapsed', newCollapsed ? '1' : '0');
+                applyDesktopSidebarState(newCollapsed);
             }
         });
     }
 
+    // Mobile Open Button (Hamburger)
+    if (mobileToggleBtn && sidebar) {
+        mobileToggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            sidebar.classList.remove('-translate-x-full');
+            if (backdrop) {
+                backdrop.classList.remove('opacity-0', 'pointer-events-none');
+            }
+        });
+    }
+
+    // Mobile Close Button
+    if (sidebarCloseBtn && sidebar) {
+        sidebarCloseBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            sidebar.classList.add('-translate-x-full');
+            if (backdrop) {
+                backdrop.classList.add('opacity-0', 'pointer-events-none');
+            }
+        });
+    }
+
+    // Mobile Backdrop Click
     if (backdrop && sidebar) {
         backdrop.addEventListener('click', function() {
             sidebar.classList.add('-translate-x-full');
-            backdrop.classList.add('opacity-0');
-            backdrop.classList.add('pointer-events-none');
+            backdrop.classList.add('opacity-0', 'pointer-events-none');
         });
     }
+
+    window.addEventListener('resize', function() {
+        if (!isMobile()) {
+            if (backdrop) {
+                backdrop.classList.add('opacity-0', 'pointer-events-none');
+            }
+            const isCollapsed = localStorage.getItem('sidebar_collapsed') === '1';
+            applyDesktopSidebarState(isCollapsed);
+        } else {
+            if (mainWrapper) {
+                mainWrapper.classList.remove('md:pl-60', 'md:pl-[72px]');
+            }
+        }
+    });
+
+    // ── Collapsible Submenu Toggle Helper ────────────────────────────────────
+    window.toggleSubmenu = function(id, btn) {
+        // If sidebar is collapsed on desktop, don't toggle inline accordion
+        if (!isMobile() && sidebar && sidebar.classList.contains('sidebar-collapsed')) {
+            return;
+        }
+        const target = document.getElementById(id);
+        if (!target) return;
+        const chevron = btn.querySelector('.submenu-chevron');
+        const isHidden = target.classList.contains('hidden');
+        if (isHidden) {
+            target.classList.remove('hidden');
+            if (chevron) chevron.classList.add('rotate-180');
+        } else {
+            target.classList.add('hidden');
+            if (chevron) chevron.classList.remove('rotate-180');
+        }
+    };
 
     // ── Profile Dropdown Toggle ──────────────────────────────────────────────
     const profileBtn = document.getElementById('profile-menu-btn');
@@ -77,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── Modal Edit Profile Helper ────────────────────────────────────────────
+    // ── Modal Edit Profile Helper ────────────────────────────────────
     window.openEditProfileModal = function() {
         const modal = document.getElementById('modal-edit-profile');
         if (modal) {
@@ -95,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // ── Modal Logout Helper ──────────────────────────────────────────────────
+    // ── Modal Logout Helper ──────────────────────────────────────────
     window.openLogoutModal = function() {
         const modal = document.getElementById('modal-logout');
         if (modal) {
