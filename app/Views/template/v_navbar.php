@@ -1,16 +1,48 @@
-<header class="sticky top-2 z-40 mx-2 sm:mx-4 my-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-700 rounded-[14px] shadow-sm py-2.5 px-3 md:px-4 flex items-center justify-between transition-colors duration-200">
+<?php
+    $bcItems = [];
+    if (!empty($breadcrumb)) {
+        if (is_array($breadcrumb)) {
+            foreach ($breadcrumb as $b) {
+                if (is_array($b)) {
+                    foreach ($b as $subB) {
+                        if (!empty($subB)) $bcItems[] = $subB;
+                    }
+                } elseif (!empty($b)) {
+                    $bcItems[] = $b;
+                }
+            }
+        } elseif (is_string($breadcrumb)) {
+            $bcItems[] = $breadcrumb;
+        }
+    }
+?>
+<header class="sticky top-2 z-40 mx-2 sm:mx-4 my-2 bg-white/95 dark:bg-slate-800/95 backdrop-blur-md border border-slate-200/80 dark:border-slate-700 rounded-[14px] shadow-sm py-2 px-3 md:px-4 flex items-center justify-between transition-colors duration-200">
     <div class="flex items-center gap-3">
-        <button id="mobile-toggle-btn" type="button" class="md:hidden p-1.5 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 text-xl leading-none focus:outline-none transition-colors" title="Open Menu">
-            <i class="bi bi-list"></i>
+        <button id="mobile-toggle-btn" type="button" class="md:hidden p-2 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-lg leading-none focus:outline-none transition-colors cursor-pointer" title="Buka Menu">
+            <i class="bi bi-list text-xl"></i>
         </button>
-        <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-            <a href="<?= base_url('kasir') ?>" class="text-sky-600 dark:text-cyan-400 hover:underline flex items-center gap-1 no-underline font-semibold">
-                <i class="bi bi-house-door-fill text-xs"></i> Home
-            </a>
-            <span class="text-slate-400 font-bold">&gt;</span>
-            <span class="text-slate-800 dark:text-slate-200 font-bold"><?= esc($section ?? 'Kasir') ?></span>
-        </nav>
+        <div class="flex flex-col justify-center">
+            <h1 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight mb-0.5">
+                <?= esc($section ?? (!empty($bcItems) ? end($bcItems) : 'Dashboard')) ?>
+            </h1>
+            <nav class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 leading-none">
+                <a href="<?= base_url('kasir') ?>" class="text-sky-600 dark:text-cyan-400 hover:underline flex items-center gap-1 no-underline font-semibold" title="Home">
+                    <i class="bi bi-house-door-fill text-xs"></i>
+                    <span>Home</span>
+                </a>
+                <?php if (!empty($bcItems)): ?>
+                    <?php foreach ($bcItems as $index => $item): ?>
+                        <?php $isLast = ($index === count($bcItems) - 1); ?>
+                        <span class="text-slate-300 dark:text-slate-600 text-[10px]">&gt;</span>
+                        <span class="<?= ($isLast ? 'text-slate-800 dark:text-slate-200 font-semibold' : 'text-slate-500 dark:text-slate-400') ?>">
+                            <?= esc($item) ?>
+                        </span>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </nav>
+        </div>
     </div>
+    
     <div class="flex items-center gap-2.5">
         <button id="theme-toggle" type="button" class="btn btn-soft-secondary p-2 rounded-xl text-base leading-none cursor-pointer" title="Ganti Mode (Dark / Light)">
             <i id="theme-icon-sun" class="bi bi-sun-fill text-amber-400"></i>
