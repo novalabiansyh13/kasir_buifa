@@ -26,6 +26,17 @@ $routes->group('barang', function ($routes) {
     $routes->add('getcategory', 'master\Barang::getCategory',   $this->auth);
 });
 
+// category
+$routes->group('category', function ($routes) {
+    $routes->add('', 'master\Category::index', $this->akses);
+    $routes->add('table', 'master\Category::datatable', $this->akses);
+    $routes->add('form', 'master\Category::forms', $this->akses);
+    $routes->add('form/(:any)', 'master\Category::forms/$1', $this->akses);
+    $routes->add('add', 'master\Category::addCategory', $this->akses);
+    $routes->add('update', 'master\Category::updateCategory', $this->akses);
+    $routes->add('delete', 'master\Category::deleteCategory', $this->akses);
+});
+
 // kasir
 $routes->group('kasir', function ($routes) {
     $routes->add('', 'kasir\Kasir::index', $this->akses);
