@@ -227,4 +227,29 @@ class Usergroup extends BaseController
         $res['csrfToken'] = csrf_hash();
         echo json_encode($res);
     }
+
+    public function getRole($stmt = '')
+    {
+        $this->response->setContentType('application/json');
+        $search = $this->getPost('searchTerm') ?? '';
+        $builder = $this->role->builder->select('a.roleid, a.rolename');
+        if (!empty($search)) {
+            $cari = strtolower(trim($search));
+            $builder->where("lower(a.rolename) like '%" . $cari . "%'", null, false);
+        }
+        $get = $builder->orderBy('a.roleid', 'ASC')->get()->getResultArray();
+
+        $arr = [];
+        foreach ($get as $g) {
+            $arr[] = [
+                'id' => (empty($stmt) ? encrypting($g['roleid']) : $g['roleid']),
+                'text' => $g['rolename']
+            ];
+        }
+        echo encode([
+            'data' => $arr,
+            'csrfToken' => csrf_hash(),
+            'trace' => db_connect()->error(),
+        ]);
+    }
 }

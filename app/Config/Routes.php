@@ -48,6 +48,7 @@ $routes->group('usergroup', function ($routes) {
     $routes->add('delete', 'master\Usergroup::deleteRole', $this->akses);
     $routes->add('access/(:any)', 'master\Usergroup::formAccess/$1', $this->akses);
     $routes->add('saveaccess', 'master\Usergroup::saveAccess', $this->akses);
+    $routes->add('getrole', 'master\Usergroup::getRole', $this->auth);
 });
 
 // user

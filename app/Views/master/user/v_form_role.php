@@ -6,15 +6,7 @@
     </div>
     <div>
         <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 required" for="set_roleid">Pilih User Group / Role</label>
-        <select name="roleid" id="set_roleid" class="w-full" required>
-            <?php if (!empty($roles)): ?>
-                <?php foreach ($roles as $r): ?>
-                    <option value="<?= $r['roleid'] ?>" <?= ((int)$row['roleid'] === (int)$r['roleid'] ? 'selected' : '') ?>>
-                        <?= esc($r['rolename']) ?>
-                    </option>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </select>
+        <select name="roleid" id="set_roleid" class="w-full" required></select>
     </div>
     <input type="hidden" id="csrf_token_srole" name="<?= csrf_token() ?>">
     <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/80">
@@ -28,8 +20,13 @@
 </form>
 <script>
 $(document).ready(function() {
-    generateSelect2('#set_roleid', '#globalModal', '', 'Pilih Role User...', '100%', 0, false, {});
+    generateSelect2('#set_roleid', '#globalModal', '<?= getURL('usergroup/getrole') ?>', 'Pilih Role User...', '100%', 0, false, {});
+    <?php if (!empty($row['roleid'])): ?>
+        var opt = new Option("<?= esc($row['rolename'] ?? 'Role') ?>", "<?= encrypting($row['roleid']) ?>", true, true);
+        $('#set_roleid').append(opt).trigger('change');
+    <?php endif; ?>
 });
+
 $('#formSetRole').submit(function(e) {
     e.preventDefault();
     var btn = $('#btnSaveSetRole');

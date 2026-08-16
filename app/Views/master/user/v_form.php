@@ -3,7 +3,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
             <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 required" for="username">Username</label>
-            <input type="text" name="username" id="username" class="form-control text-xs" value="<?= (($form_type == 'edit') ? esc($row['username']) : '') ?>" placeholder="username_login" <?= ($form_type == 'edit' ? 'readonly' : 'required') ?>>
+            <input type="text" name="username" id="username" class="form-control text-xs" value="<?= (($form_type == 'edit') ? esc($row['username']) : '') ?>" placeholder="kasir1" required <?= ($form_type == 'edit' ? 'readonly' : 'autofocus') ?>>
         </div>
         <div>
             <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 required" for="fullname">Nama Lengkap</label>
@@ -19,15 +19,7 @@
         </div>
         <div>
             <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5 required" for="roleid">Role User Group</label>
-            <select name="roleid" id="roleid" class="w-full" required>
-                <?php if (!empty($roles)): ?>
-                    <?php foreach ($roles as $r): ?>
-                        <option value="<?= $r['roleid'] ?>" <?= (($form_type == 'edit' && (int)$row['roleid'] === (int)$r['roleid']) ? 'selected' : '') ?>>
-                            <?= esc($r['rolename']) ?>
-                        </option>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </select>
+            <select name="roleid" id="roleid" class="w-full" required></select>
         </div>
     </div>
     <div>
@@ -56,8 +48,13 @@
 </form>
 <script>
 $(document).ready(function() {
-    generateSelect2('#roleid', '#globalModal', '', 'Pilih Role User...', '100%', 0, false, {});
+    generateSelect2('#roleid', '#globalModal', '<?= getURL('usergroup/getrole') ?>', 'Pilih Role User...', '100%', 0, false, {});
+    <?php if ($form_type == 'edit' && !empty($row['roleid'])): ?>
+        var opt = new Option("<?= esc($row['rolename'] ?? 'Role') ?>", "<?= encrypting($row['roleid']) ?>", true, true);
+        $('#roleid').append(opt).trigger('change');
+    <?php endif; ?>
 });
+
 $('#formUser').submit(function(e) {
     e.preventDefault();
     var form_type = "<?= $form_type ?>";
@@ -65,7 +62,6 @@ $('#formUser').submit(function(e) {
     var btn = $('#btnSaveUser');
     var old_html = btn.html();
     btn.html('<i class="bi bi-arrow-repeat animate-spin"></i> Menyimpan...').attr('disabled', 'disabled');
-    
     var csrf = decrypter($("#csrf_token").val());
     $("#csrf_token_user").val(csrf);
     
@@ -74,9 +70,9 @@ $('#formUser').submit(function(e) {
         type: 'post',
         url: link,
         data: formData,
+        dataType: 'json',
         contentType: false,
         processData: false,
-        dataType: 'json',
         success: function(response) {
             btn.html(old_html).removeAttr('disabled');
             if (response.csrfToken) {
@@ -93,7 +89,7 @@ $('#formUser').submit(function(e) {
                     $('.table-master').DataTable().ajax.reload(null, false);
                 }
             } else {
-                showError(response.pesan || 'Gagal menyimpan user.');
+                showError(response.pesan || 'Gagal menyimpan data user.');
             }
         },
         error: function(xhr, ajaxOptions, thrownError) {

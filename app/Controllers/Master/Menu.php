@@ -70,11 +70,9 @@ class Menu extends BaseController
             $id = decrypting($id);
             $row = $this->menu->getOne($id);
         }
-        $parents = $this->menu->orderBy('sequence', 'ASC')->findAll();
         return view('master/menu/v_form', [
             'form_type' => $form_type,
-            'row' => $row,
-            'parents' => $parents
+            'row' => $row
         ]);
     }
 
@@ -83,7 +81,12 @@ class Menu extends BaseController
         $menuname = trim($this->getPost('menuname') ?? '');
         $url = trim($this->getPost('url') ?? '');
         $icon = trim($this->getPost('icon') ?? 'bi bi-grid');
-        $parentid = (int) ($this->getPost('parentid') ?? 0);
+        $parentid = $this->getPost('parentid') ?? 0;
+        if (!empty($parentid) && !is_numeric($parentid)) {
+            $parentid = (int) decrypting($parentid);
+        } else {
+            $parentid = (int) $parentid;
+        }
         $is_active = $this->getPost('is_active') ? true : false;
         $res = [];
         $this->response->setContentType('application/json');
@@ -134,7 +137,12 @@ class Menu extends BaseController
         $menuname = trim($this->getPost('menuname') ?? '');
         $url = trim($this->getPost('url') ?? '');
         $icon = trim($this->getPost('icon') ?? 'bi bi-grid');
-        $parentid = (int) ($this->getPost('parentid') ?? 0);
+        $parentid = $this->getPost('parentid') ?? 0;
+        if (!empty($parentid) && !is_numeric($parentid)) {
+            $parentid = (int) decrypting($parentid);
+        } else {
+            $parentid = (int) $parentid;
+        }
         $is_active = $this->getPost('is_active') ? true : false;
         $res = [];
         $this->response->setContentType('application/json');
@@ -234,5 +242,42 @@ class Menu extends BaseController
         $this->db->transComplete();
         $res['csrfToken'] = csrf_hash();
         echo json_encode($res);
+    }
+
+    public function getMenu($stmt = '')
+    {
+        $this->response->setContentType('application/json');
+        $search = $this->getPost('searchTerm') ?? '';
+        $exceptId = $this->getPost('exceptId') ?? '';
+        if (!empty($exceptId) && !is_numeric($exceptId)) {
+            $exceptId = decrypting($exceptId);
+        }
+
+        $builder = $this->menu->builder->select('a.menuid, a.menuname, a.url, a.icon');
+        if (!empty($exceptId) && is_numeric($exceptId)) {
+            $builder->where('a.menuid !=', (int) $exceptId);
+        }
+        if (!empty($search)) {
+            $cari = strtolower(trim($search));
+            $builder->where("(lower(a.menuname) like '%" . $cari . "%' or lower(a.url) like '%" . $cari . "%')", null, false);
+        }
+        $get = $builder->orderBy('a.sequence', 'ASC')->get()->getResultArray();
+
+        $arr = [];
+        $arr[] = [
+            'id' => (empty($stmt) ? encrypting(0) : 0),
+            'text' => ''
+        ];
+        foreach ($get as $g) {
+            $arr[] = [
+                'id' => (empty($stmt) ? encrypting($g['menuid']) : $g['menuid']),
+                'text' => $g['menuname'] . ' (' . $g['url'] . ')'
+            ];
+        }
+        echo encode([
+            'data' => $arr,
+            'csrfToken' => csrf_hash(),
+            'trace' => db_connect()->error(),
+        ]);
     }
 }

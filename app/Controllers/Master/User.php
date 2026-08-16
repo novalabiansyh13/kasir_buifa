@@ -90,6 +90,11 @@ class User extends BaseController
         $fullname = trim($this->getPost('fullname') ?? '');
         $password = trim($this->getPost('password') ?? '');
         $roleid = $this->getPost('roleid') ?? 2;
+        if (!empty($roleid) && !is_numeric($roleid)) {
+            $roleid = (int) decrypting($roleid);
+        } else {
+            $roleid = (int) $roleid;
+        }
         $is_active = $this->getPost('is_active') ? true : false;
         $res = [];
         $this->response->setContentType('application/json');
@@ -141,6 +146,11 @@ class User extends BaseController
         $fullname = trim($this->getPost('fullname') ?? '');
         $password = trim($this->getPost('password') ?? '');
         $roleid = $this->getPost('roleid') ?? 2;
+        if (!empty($roleid) && !is_numeric($roleid)) {
+            $roleid = (int) decrypting($roleid);
+        } else {
+            $roleid = (int) $roleid;
+        }
         $is_active = $this->getPost('is_active') ? true : false;
 
         $res = [];
@@ -197,6 +207,9 @@ class User extends BaseController
             if (empty($id)) {
                 throw new Exception("ID user tidak valid.");
             }
+            if ((int)$id === 1) {
+                throw new Exception("User Administrator utama (ID 1) tidak boleh dihapus.");
+            }
             $currentUserId = getSession('userid');
             if ((int)$id === (int)$currentUserId) {
                 throw new Exception("Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif.");
@@ -217,18 +230,20 @@ class User extends BaseController
         echo json_encode($res);
     }
 
-    public function formRole($idEnc = "")
+    public function formRole($id = "")
     {
-        $id = decrypting($idEnc);
-        $row = $this->user->getOne($id);
-        if (empty($row)) {
-            echo "<div class='p-4 text-rose-500 text-xs font-bold'>User tidak ditemukan.</div>";
-            return;
+        if (empty($id)) {
+            return "ID User tidak valid.";
+        }
+        $idDec = decrypting($id);
+        $user = $this->user->getOne($idDec);
+        if (!$user) {
+            return "Data user tidak ditemukan.";
         }
         $roles = $this->role->getAll();
         return view('master/user/v_form_role', [
-            'row' => $row,
-            'idEnc' => $idEnc,
+            'idEnc' => $id,
+            'row' => $user,
             'roles' => $roles
         ]);
     }
@@ -237,12 +252,17 @@ class User extends BaseController
     {
         $id = decrypting($this->getPost('id'));
         $roleid = $this->getPost('roleid');
+        if (!empty($roleid) && !is_numeric($roleid)) {
+            $roleid = (int) decrypting($roleid);
+        } else {
+            $roleid = (int) $roleid;
+        }
         $res = [];
         $this->response->setContentType('application/json');
         $this->db->transBegin();
         try {
             if (empty($id) || empty($roleid)) {
-                throw new Exception("Data role tidak valid.");
+                throw new Exception("Data pengguna atau role tidak valid.");
             }
             $this->user->setRole($id, $roleid);
             $res = [
