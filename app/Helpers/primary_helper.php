@@ -175,16 +175,28 @@ function getAllAccess()
     ];
 }
 
+function getCurrentUsername()
+{
+    $u = getSession('username');
+    return !empty($u) ? $u : 'system';
+}
+
 // Dynamic Sidebar Menu Generator
 function generateSidebarMenus()
 {
-    $userid = getSession('userid');
-    if (empty($userid) || !is_numeric($userid)) {
-        $menuModel = new \App\Models\Msmenu();
-        return $menuModel->getAllMenus();
-    }
+    $roleid = getSession('roleid');
     $menuModel = new \App\Models\Msmenu();
-    return $menuModel->getMenusByUser((int) $userid);
+    if (empty($roleid) || !is_numeric($roleid)) {
+        $userid = getSession('userid');
+        if (!empty($userid) && is_numeric($userid)) {
+            $userModel = new \App\Models\Msuser();
+            $u = $userModel->getOne($userid);
+            $roleid = $u['roleid'] ?? 1;
+        } else {
+            return $menuModel->getAllMenus();
+        }
+    }
+    return $menuModel->getMenusByRoleTree((int) $roleid);
 }
 
 function validateDeleteData(array $tables)

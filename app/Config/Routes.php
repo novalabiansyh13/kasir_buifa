@@ -37,6 +37,32 @@ $routes->group('category', function ($routes) {
     $routes->add('delete', 'master\Category::deleteCategory', $this->akses);
 });
 
+// usergroup
+$routes->group('usergroup', function ($routes) {
+    $routes->add('', 'master\Usergroup::index', $this->akses);
+    $routes->add('table', 'master\Usergroup::datatable', $this->akses);
+    $routes->add('form', 'master\Usergroup::forms', $this->akses);
+    $routes->add('form/(:any)', 'master\Usergroup::forms/$1', $this->akses);
+    $routes->add('add', 'master\Usergroup::addRole', $this->akses);
+    $routes->add('update', 'master\Usergroup::updateRole', $this->akses);
+    $routes->add('delete', 'master\Usergroup::deleteRole', $this->akses);
+    $routes->add('access/(:any)', 'master\Usergroup::formAccess/$1', $this->akses);
+    $routes->add('saveaccess', 'master\Usergroup::saveAccess', $this->akses);
+});
+
+// user
+$routes->group('user', function ($routes) {
+    $routes->add('', 'master\User::index', $this->akses);
+    $routes->add('table', 'master\User::datatable', $this->akses);
+    $routes->add('form', 'master\User::forms', $this->akses);
+    $routes->add('form/(:any)', 'master\User::forms/$1', $this->akses);
+    $routes->add('add', 'master\User::addUser', $this->akses);
+    $routes->add('update', 'master\User::updateUser', $this->akses);
+    $routes->add('delete', 'master\User::deleteUser', $this->akses);
+    $routes->add('role/(:any)', 'master\User::formRole/$1', $this->akses);
+    $routes->add('saverole', 'master\User::saveRole', $this->akses);
+});
+
 // kasir
 $routes->group('kasir', function ($routes) {
     $routes->add('', 'kasir\Kasir::index', $this->akses);

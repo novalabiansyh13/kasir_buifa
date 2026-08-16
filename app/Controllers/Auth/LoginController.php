@@ -39,7 +39,8 @@ class LoginController extends BaseController
         setSession('userid', $user['userid']);
         setSession('username', $user['username']);
         setSession('fullname', $user['fullname']);
-        setSession('role', $user['role'] ?? 'kasir');
+        setSession('roleid', $user['roleid'] ?? 1);
+        setSession('role', $user['rolename'] ?? $user['role'] ?? 'Administrator');
         setSession('photo', $user['photo'] ?? '');
         return respondAndDie(true, 'Login berhasil! Pengalihan halaman...');
     }
