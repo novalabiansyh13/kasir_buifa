@@ -1,0 +1,27 @@
+# Disable directory browsing
+Options -Indexes
+
+# ----------------------------------------------------------------------
+# Rewrite engine
+# ----------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+	Options +FollowSymlinks
+	RewriteEngine On
+
+	# 1) Blokir akses langsung ke file/folder sensitif
+	RewriteRule ^(\.env|\.env\.example|\.git|app|writable|vendor|tests|docs|build|builds)(/|$) - [F,L]
+	RewriteRule ^(composer\.(json|lock)|env|preload\.php|spark|phpunit\.dist\.xml|LICENSE|README\.md)$ - [F,L]
+
+	# 2) Aset statis di folder public/ (js, css, images, dll) dilayani langsung
+	RewriteRule ^(js|css|images|uploads|favicon\.ico|robots\.txt)(.*)$ public/$1$2 [L]
+
+	# 3) Selain itu → front controller (public/index.php via bridge index.php)
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule ^([\s\S]*)$ index.php/$1 [L,NC,QSA]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+	# Tanpa mod_rewrite, semua 404 dialihkan ke index.php
+	ErrorDocument 404 index.php
+</IfModule>

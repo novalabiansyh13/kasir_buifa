@@ -77,3 +77,17 @@ defined('EXIT_USER_INPUT')     || define('EXIT_USER_INPUT', 7);     // invalid u
 defined('EXIT_DATABASE')       || define('EXIT_DATABASE', 8);       // database error
 defined('EXIT__AUTO_MIN')      || define('EXIT__AUTO_MIN', 9);      // lowest automatically-assigned error code
 defined('EXIT__AUTO_MAX')      || define('EXIT__AUTO_MAX', 125);    // highest automatically-assigned error code
+
+/*
+ | --------------------------------------------------------------------------
+ | Komponen Akses
+ | --------------------------------------------------------------------------
+ | Dipakai sebagai index array akses (COMPO_*) pada view / controller.
+ */
+defined('COMVIEW')     || define('COMVIEW', 1);
+defined('COMADD')      || define('COMADD', 2);
+defined('COMEDIT')     || define('COMEDIT', 3);
+defined('COMDELETE')   || define('COMDELETE', 4);
+defined('COMUPLOAD')   || define('COMUPLOAD', 5);
+defined('COMDOWNLOAD') || define('COMDOWNLOAD', 6);
+defined('COMSPECIAL')  || define('COMSPECIAL', 7);

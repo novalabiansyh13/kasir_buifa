@@ -6,11 +6,9 @@ use CodeIgniter\Model;
 
 class BarangModel extends Model
 {
-    protected $table         = 'barang';
-    protected $primaryKey    = 'id_barang';
-    protected $useAutoIncrement = true;
-    protected $returnType    = 'array';
-    protected $useSoftDeletes = false;
+    protected $table = 'barang as a';
+
+    protected $primaryKey = 'id_barang';
 
     protected $allowedFields = [
         'nama_barang',
@@ -19,47 +17,76 @@ class BarangModel extends Model
         'margin',
     ];
 
-    protected $useTimestamps  = false;  // kolom timestamp dikelola manual oleh DB
+    public function __construct()
+    {
+        parent::__construct();
+        $this->db = db_connect();
+        $this->builder = $this->db->table($this->table);
+    }
 
-    protected $validationRules = [
-        'nama_barang' => 'required|min_length[2]|max_length[100]',
-        'harga_beli'  => 'required|numeric|greater_than[0]',
-        'harga_jual'  => 'required|numeric|greater_than[0]',
-    ];
+    // Kolom yang bisa di-search datatable (null = tidak bisa dicari)
+    public function searchable()
+    {
+        return [
+            null,               // No
+            'a.nama_barang',    // Nama Barang
+            'a.harga_beli',     // Harga Beli
+            'a.harga_jual',     // Harga Jual
+            'a.margin',         // Margin
+            null,               // Action
+        ];
+    }
 
-    protected $validationMessages = [
-        'nama_barang' => [
-            'required'   => 'Nama barang wajib diisi.',
-            'min_length' => 'Nama barang minimal 2 karakter.',
-            'max_length' => 'Nama barang maksimal 100 karakter.',
-        ],
-        'harga_beli' => [
-            'required'      => 'Harga beli wajib diisi.',
-            'numeric'       => 'Harga beli harus berupa angka.',
-            'greater_than'  => 'Harga beli harus lebih dari 0.',
-        ],
-        'harga_jual' => [
-            'required'      => 'Harga jual wajib diisi.',
-            'numeric'       => 'Harga jual harus berupa angka.',
-            'greater_than'  => 'Harga jual harus lebih dari 0.',
-        ],
-    ];
+    // Query untuk datatable (return BUILDER, bukan hasil)
+    public function getBarang()
+    {
+        return $this->builder->select('a.*');
+    }
 
-    /**
-     * Hitung dan set margin otomatis sebelum insert/update.
-     */
-    public function hitungMargin(array &$data): void
+    // Ambil satu baris
+    public function getOne($id = '')
+    {
+        $x = $this->builder->select('a.*');
+        if ($id != '') {
+            $x->where('a.id_barang', $id);
+        }
+        return $x->get()->getRowArray();
+    }
+
+    // Hitung margin otomatis sebelum insert/update
+    public function hitungMargin(array &$data)
     {
         if (isset($data['harga_jual'], $data['harga_beli'])) {
             $data['margin'] = (float) $data['harga_jual'] - (float) $data['harga_beli'];
         }
     }
 
-    /**
-     * Kembalikan semua barang diurutkan nama.
-     */
-    public function getAll(): array
+    // CRUD
+    public function store($data)
     {
-        return $this->orderBy('nama_barang', 'ASC')->findAll();
+        return $this->builder->insert($data);
+    }
+
+    public function edit($data, $id)
+    {
+        return $this->builder->update($data, ['id_barang' => $id]);
+    }
+
+    public function destroy($id)
+    {
+        return $this->builder->delete(['id_barang' => $id]);
+    }
+
+    // Search untuk select2 / autocomplete
+    public function getSelect($search = '')
+    {
+        $cari = strtolower($search);
+        return $this->builder
+            ->select('a.id_barang, a.nama_barang, a.harga_beli, a.harga_jual, a.margin')
+            ->where("(lower(a.nama_barang) like '%" . $cari . "%')", null, false)
+            ->limit(15)
+            ->orderBy('a.nama_barang')
+            ->get()
+            ->getResultArray();
     }
 }

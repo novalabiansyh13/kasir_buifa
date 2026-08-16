@@ -6,10 +6,9 @@ use CodeIgniter\Model;
 
 class DetailTransaksiModel extends Model
 {
-    protected $table         = 'detail_transaksi';
-    protected $primaryKey    = 'id_detail';
-    protected $useAutoIncrement = true;
-    protected $returnType    = 'array';
+    protected $table = 'detail_transaksi as a';
+
+    protected $primaryKey = 'id_detail';
 
     protected $allowedFields = [
         'id_transaksi',
@@ -21,5 +20,15 @@ class DetailTransaksiModel extends Model
         'subtotal_margin',
     ];
 
-    protected $useTimestamps = false;
+    public function __construct()
+    {
+        parent::__construct();
+        $this->db = db_connect();
+        $this->builder = $this->db->table($this->table);
+    }
+
+    public function storeBatch($rows)
+    {
+        return $this->builder->insertBatch($rows);
+    }
 }
