@@ -54,11 +54,18 @@ class BarangModel extends Model
 
     public function store($data)
     {
+        $username = getCurrentUsername();
+        $data['createdby'] = $username;
+        $data['createddate'] = date('Y-m-d H:i:s');
+        $data['updatedby'] = $username;
+        $data['updateddate'] = date('Y-m-d H:i:s');
         return $this->builder->insert($data);
     }
 
     public function edit($data, $id)
     {
+        $data['updatedby'] = getCurrentUsername();
+        $data['updateddate'] = date('Y-m-d H:i:s');
         return $this->builder->update($data, ['id_barang' => $id]);
     }
 

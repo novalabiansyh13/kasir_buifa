@@ -40,7 +40,7 @@ class Barang extends BaseController
         $table = Datatables::method([BarangModel::class, 'getBarang'], 'searchable')
             ->make();
         $table->updateRow(function ($db, $no) {
-            $btn_edit = "<a href='" . getURL('barang/form/' . encrypting($db->id_barang)) . "' class='btn btn-soft-warning w-8 h-8 p-0 rounded-lg text-sm inline-flex items-center justify-center me-1.5 shadow-xs' title='Edit Produk'><i class='bi bi-pencil-square'></i></a>";
+            $btn_edit = "<button type='button' onclick=\"openModal('Edit Produk', '" . getURL('barang/form/' . encrypting($db->id_barang)) . "', {}, 'max-w-xl')\" class='btn btn-soft-warning w-8 h-8 p-0 rounded-lg text-sm inline-flex items-center justify-center me-1.5 shadow-xs' title='Edit Produk'><i class='bi bi-pencil-square'></i></button>";
             $btn_hapus = "<button type='button' class='btn btn-soft-danger w-8 h-8 p-0 rounded-lg text-sm inline-flex items-center justify-center shadow-xs cursor-pointer' onclick=\"modalDelete('Hapus barang - " . esc($db->nama_barang) . "', {'link':'" . getURL('barang/delete') . "', 'id':'" . encrypting($db->id_barang) . "', 'pagetype':'table'})\" title='Hapus Produk'><i class='bi bi-trash3-fill'></i></button>";
             
             $cat_name = !empty($db->categoryname) ? esc($db->categoryname) : 'Tanpa Kategori';

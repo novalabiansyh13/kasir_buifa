@@ -11,9 +11,9 @@
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-0 mt-0.5">Kelola harga beli, harga jual, dan margin keuntungan secara terpusat.</p>
         </div>
         <?php if ($akses["COMPO_" . COMADD]) : ?>
-            <a href="<?= getURL('barang/form') ?>" class="btn btn-primary btn-sm flex items-center gap-1.5 shadow-xs font-bold no-underline">
+            <button type="button" onclick="openModal('Tambah Produk Baru', '<?= getURL('barang/form') ?>', {}, 'max-w-xl')" class="btn btn-primary btn-sm flex items-center gap-1.5 shadow-xs font-bold">
                 <i class="bi bi-plus-lg text-base"></i> Tambah Produk Baru
-            </a>
+            </button>
         <?php endif; ?>
     </div>
     <div class="card shadow-sm border border-slate-200/80 dark:border-slate-700 rounded-[14px] overflow-hidden bg-white dark:bg-slate-800 p-4">
