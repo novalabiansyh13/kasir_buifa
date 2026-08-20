@@ -8,9 +8,14 @@ $this->auth   = ['filter' => 'checkAccess'];
 $this->noauth = ['filter' => 'isNotLogin'];
 $this->akses  = ['filter' => 'checkAccess'];
 
-$routes->get('login', 'Auth\LoginController::index', $this->noauth);
-$routes->post('login/process', 'Auth\LoginController::process', $this->noauth);
-$routes->get('logout', 'Auth\LoginController::logout', $this->auth);
+$routes->setDefaultNamespace('App\Controllers');
+$routes->setTranslateURIDashes(false);
+$routes->set404Override();
+
+$routes->get('/', 'Auth\LoginController::index', $this->noauth);
+$routes->group('login', function ($routes) {
+    $routes->add('process', 'Auth\LoginController::process', $this->noauth);
+});
 $routes->post('profile/update', 'Auth\ProfileController::update', $this->auth);
 
 //barang
@@ -84,3 +89,5 @@ $routes->group('kasir', function ($routes) {
     $routes->add('table', 'kasir\Kasir::datatable', $this->akses);
     $routes->add('simpan', 'kasir\Kasir::simpan', $this->akses);
 });
+
+$routes->add('logout', 'Auth\LoginController::logout', $this->auth);
