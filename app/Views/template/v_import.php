@@ -14,4 +14,5 @@
 <script src="<?= base_url('public/js/jquery.nestable.js') ?>"></script>
 <script src="<?= base_url('public/js/moment.min.js') ?>"></script>
 <script src="<?= base_url('public/js/daterangepicker.min.js') ?>"></script>
+<script src="<?= base_url('public/js/apexcharts.min.js') ?>"></script>
 <script src="<?= base_url('public/js/app-ui.js') ?>"></script>

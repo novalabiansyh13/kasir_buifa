@@ -90,4 +90,10 @@ $routes->group('kasir', function ($routes) {
     $routes->add('simpan', 'kasir\Kasir::simpan', $this->akses);
 });
 
+// dashboard omzet
+$routes->group('omzetboard', function ($routes) {
+    $routes->add('', 'Dashboard\OmzetTahun::index', $this->akses);
+    $routes->add('getdata', 'Dashboard\OmzetTahun::getData', $this->akses);
+});
+
 $routes->add('logout', 'Auth\LoginController::logout', $this->auth);
