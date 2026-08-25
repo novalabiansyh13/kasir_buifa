@@ -28,7 +28,6 @@
             <nav class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 leading-none">
                 <a href="<?= base_url('kasir') ?>" class="text-sky-600 dark:text-cyan-400 hover:underline flex items-center gap-1 no-underline font-semibold" title="Home">
                     <i class="bi bi-house-door-fill text-xs"></i>
-                    <span>Home</span>
                 </a>
                 <?php if (!empty($bcItems)): ?>
                     <?php foreach ($bcItems as $index => $item): ?>
