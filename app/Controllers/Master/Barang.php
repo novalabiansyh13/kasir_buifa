@@ -19,7 +19,7 @@ class Barang extends BaseController
         $this->arrbc = [
             [
                 'Master',
-                'Barang',
+                'Produk & Barang',
             ]
         ];
     }
@@ -30,7 +30,7 @@ class Barang extends BaseController
             'title' => 'Data Barang',
             'breadcrumb' => $this->arrbc,
             'akses' => $this->getArrayAccess(),
-            'section' => 'Master Barang'
+            'section' => 'Produk & Barang'
         ]);
     }
 

@@ -1,9 +1,8 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // ── Dark / Light Mode Switcher ───────────────────────────────────────────
+    // Dark / Light Mode Switcher
     const themeBtn = document.getElementById('theme-toggle') || document.getElementById('theme-toggle-btn');
     const sunIcon = document.getElementById('theme-icon-sun');
     const moonIcon = document.getElementById('theme-icon-moon');
-
     function applyThemeUI(isDark) {
         if (isDark) {
             document.documentElement.classList.add('dark');
@@ -20,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const currentTheme = localStorage.getItem('theme') || 'dark';
     applyThemeUI(currentTheme === 'dark');
-
     window.toggleTheme = function() {
         const isCurrentlyDark = document.documentElement.classList.contains('dark');
         const newTheme = isCurrentlyDark ? 'light' : 'dark';
@@ -35,7 +33,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── Sidebar Toggle (Desktop Mini Sidebar & Mobile Drawer) ────────────────
     const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
     const mobileToggleBtn = document.getElementById('mobile-toggle-btn');
     const desktopReopenBtn = document.getElementById('desktop-sidebar-reopen-btn');
@@ -44,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebar = document.getElementById('sidebar');
     const backdrop = document.getElementById('sidebar-backdrop');
     const mainWrapper = document.getElementById('main-wrapper');
-
     function isMobile() {
         return window.innerWidth < 768;
     }
@@ -70,13 +66,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Restore desktop sidebar state on load
     if (!isMobile()) {
         const isCollapsed = localStorage.getItem('sidebar_collapsed') === '1';
         applyDesktopSidebarState(isCollapsed);
     }
 
-    // Floating Attached Button on Sidebar Border
     if (sidebarToggleBtn) {
         sidebarToggleBtn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -89,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Mobile Open Button (Hamburger)
     if (mobileToggleBtn && sidebar) {
         mobileToggleBtn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -100,7 +93,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Mobile Close Button
     if (sidebarCloseBtn && sidebar) {
         sidebarCloseBtn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -111,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Mobile Backdrop Click
     if (backdrop && sidebar) {
         backdrop.addEventListener('click', function() {
             sidebar.classList.add('-translate-x-full');
@@ -133,9 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ── Collapsible Submenu Toggle Helper ────────────────────────────────────
     window.toggleSubmenu = function(id, btn) {
-        // If sidebar is collapsed on desktop, don't toggle inline accordion
         if (!isMobile() && sidebar && sidebar.classList.contains('sidebar-collapsed')) {
             return;
         }
@@ -152,10 +141,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // ── Profile Dropdown Toggle ──────────────────────────────────────────────
     const profileBtn = document.getElementById('profile-menu-btn');
     const profileDropdown = document.getElementById('profile-dropdown');
-
     if (profileBtn && profileDropdown) {
         profileBtn.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -169,7 +156,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── Modal Edit Profile Helper ────────────────────────────────────
     window.openEditProfileModal = function() {
         const modal = document.getElementById('modal-edit-profile');
         if (modal) {
@@ -187,7 +173,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // ── Modal Logout Helper ──────────────────────────────────────────
     window.openLogoutModal = function() {
         const modal = document.getElementById('modal-logout');
         if (modal) {

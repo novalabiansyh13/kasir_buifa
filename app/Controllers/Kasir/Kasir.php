@@ -39,13 +39,18 @@ class Kasir extends BaseController
     public function datatable()
     {
         $this->response->setContentType('application/json');
-        $ringkasan = $this->transaksi->getRingkasanHariIni();
+        $startDate = $this->getPost('start_date') ?: date('Y-m-d');
+        $endDate = $this->getPost('end_date') ?: date('Y-m-d');
+
+        $ringkasan = $this->transaksi->getRingkasan($startDate, $endDate);
         $table = Datatables::method([TransaksiModel::class, 'getRekap'], 'searchable')
+            ->setParams([$startDate, $endDate])
             ->make();
         $table->updateRow(function ($db, $no) {
             return [
                 $no,
-                "<span class='px-2 py-0.5 rounded-md font-mono text-[11px] font-bold bg-slate-100 dark:bg-[#0b1322] border border-slate-200 dark:border-[#1e293b] text-slate-700 dark:text-slate-300'>" . $db->jam . "</span>",
+                "<span class='px-2 py-0.5 rounded-md font-mono text-[11px] font-bold bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 inline-flex items-center gap-1'><i class='bi bi-calendar3 text-[10px] text-sky-600 dark:text-cyan-400'></i>" . $db->tanggal . "</span>",
+                "<span class='px-2 py-0.5 rounded-md font-mono text-[11px] font-bold bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 inline-flex items-center gap-1'><i class='bi bi-clock text-[10px] text-amber-500'></i>" . $db->jam . "</span>",
                 "<span class='font-medium text-slate-800 dark:text-slate-200'>" . esc($db->detail_barang) . "</span>",
                 "<span class='font-bold font-mono text-sky-600 dark:text-cyan-400'>" . idr($db->total_bayar) . "</span>",
                 "<span class='font-bold font-mono text-amber-600 dark:text-amber-400'>" . idr($db->total_margin) . "</span>",

@@ -48,6 +48,6 @@ class LoginController extends BaseController
     public function logout()
     {
         destroySession();
-        return redirect()->to(base_url('login'));
+        return redirect()->to(base_url(''));
     }
 }

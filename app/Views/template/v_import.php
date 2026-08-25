@@ -12,5 +12,6 @@
 <script src="<?= base_url('public/js/select2.min.js') ?>"></script>
 <script src="<?= base_url('public/js/sweetalert2.all.min.js') ?>"></script>
 <script src="<?= base_url('public/js/jquery.nestable.js') ?>"></script>
-<script src="<?= base_url('public/js/template.js') ?>"></script>
+<script src="<?= base_url('public/js/moment.min.js') ?>"></script>
+<script src="<?= base_url('public/js/daterangepicker.min.js') ?>"></script>
 <script src="<?= base_url('public/js/app-ui.js') ?>"></script>

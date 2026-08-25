@@ -119,13 +119,19 @@
                 </div>
             </div>
             <div class="card shadow-sm border border-slate-200/80 dark:border-slate-700 rounded-[14px] overflow-hidden bg-white dark:bg-slate-800">
-                <div class="bg-[#0284c7] text-white flex items-center justify-between px-4 py-3 font-bold text-xs sm:text-sm">
+                <div class="bg-[#0284c7] text-white flex flex-col sm:flex-row sm:items-center justify-between px-4 py-3 gap-2.5 font-bold text-xs sm:text-sm">
                     <span class="flex items-center gap-2">
-                        <i class="bi bi-journal-text text-base"></i> Rekap Transaksi Hari Ini
+                        <i class="bi bi-journal-text text-base"></i> Rekap Transaksi
                     </span>
-                    <button type="button" id="btnRefresh" class="btn btn-soft-secondary btn-sm flex items-center gap-1 text-xs" title="Muat ulang data">
-                        <i class="bi bi-arrow-clockwise"></i> Refresh Data
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex items-center">
+                            <i class="bi bi-calendar3 absolute left-2.5 text-slate-400 text-xs pointer-events-none z-10"></i>
+                            <input type="text" id="filter-daterange" class="form-control input-daterange font-semibold cursor-pointer w-[195px] sm:w-[205px] bg-white/95 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xs text-slate-800 dark:text-slate-200" readonly title="Filter Rentang Tanggal" />
+                        </div>
+                        <button type="button" id="btnRefresh" class="btn btn-soft-secondary btn-sm flex items-center gap-1 text-xs" title="Reset filter ke hari ini & Refresh">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="p-4 overflow-x-auto">
@@ -133,16 +139,17 @@
                         <thead class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold border-b border-slate-200 dark:border-slate-700">
                             <tr>
                                 <th class="py-3 px-3 text-center">No</th>
+                                <th class="py-3 px-3 text-center">Tanggal</th>
                                 <th class="py-3 px-3 text-center">Jam</th>
                                 <th class="py-3 px-3 text-center">Detail Barang</th>
-                                <th class="py-3 px-3 text-center" style="min-width: 120px;">Total Bayar</th>
-                                <th class="py-3 px-3 text-center" style="min-width: 100px;">Margin</th>
+                                <th class="py-3 px-3 text-center">Total Bayar</th>
+                                <th class="py-3 px-3 text-center">Margin</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-700 text-slate-900 dark:text-slate-100"></tbody>
                         <tfoot class="bg-slate-50 dark:bg-slate-900 font-bold border-t border-slate-200 dark:border-slate-700">
                             <tr>
-                                <td colspan="3" class="py-3 px-3 text-start text-slate-700 dark:text-slate-300"><i class="bi bi-calculator me-1"></i>TOTAL HARI INI:</td>
+                                <td colspan="4" class="py-3 px-3 text-start text-slate-700 dark:text-slate-300"><i class="bi bi-calculator me-1"></i>TOTAL:</td>
                                 <td class="py-3 px-3 text-center text-sky-600 dark:text-cyan-400 font-bold text-sm font-mono" id="footerPenjualan">Rp 0</td>
                                 <td class="py-3 px-3 text-center text-amber-600 dark:text-amber-400 font-bold text-sm font-mono" id="footerMargin">Rp 0</td>
                             </tr>
@@ -253,6 +260,27 @@ $(document).ready(function() {
         });
     }
 
+    $('#filter-daterange').daterangepicker({
+        startDate: moment(),
+        endDate: moment(),
+        linkedCalendars: false,
+        showCustomRangeLabel: false,
+        alwaysShowCalendars: true,
+        opens: 'left',
+        locale: {
+            format: 'DD/MM/YYYY',
+            separator: ' - ',
+            applyLabel: 'Terapkan',
+            cancelLabel: 'Batal',
+            daysOfWeek: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+            monthNames: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+        }
+    });
+
+    $('#filter-daterange').on('apply.daterangepicker', function(ev, picker) {
+        if (tbl_rekap) tbl_rekap.ajax.reload();
+    });
+
     tbl_rekap = $('#tabelRekap').DataTable({
         serverSide: true,
         destroy: true,
@@ -263,6 +291,11 @@ $(document).ready(function() {
             dataType: 'json',
             data: function(param) {
                 param["<?= csrf_token() ?>"] = decrypter($("#csrf_token").val());
+                var drp = $('#filter-daterange').data('daterangepicker');
+                if (drp) {
+                    param.start_date = drp.startDate.format('YYYY-MM-DD');
+                    param.end_date = drp.endDate.format('YYYY-MM-DD');
+                }
                 return param;
             },
             dataSrc: function(json) {
@@ -285,14 +318,22 @@ $(document).ready(function() {
         columns: [
             { data: 0, className: 'text-center' },
             { data: 1, className: 'text-center' },
-            { data: 2, className: 'text-start' },
-            { data: 3, className: 'text-center font-mono' },
-            { data: 4, className: 'text-center font-mono' }
+            { data: 2, className: 'text-center' },
+            { data: 3, className: 'text-start' },
+            { data: 4, className: 'text-center font-mono' },
+            { data: 5, className: 'text-center font-mono' }
         ]
     });
 
     $('#btnRefresh').on('click', function() {
-        if (tbl_rekap) tbl_rekap.ajax.reload();
+        var drp = $('#filter-daterange').data('daterangepicker');
+        if (drp) {
+            drp.setStartDate(moment());
+            drp.setEndDate(moment());
+        }
+        if (tbl_rekap) {
+            tbl_rekap.ajax.reload();
+        }
     });
 });
 
