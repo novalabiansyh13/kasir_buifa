@@ -48,12 +48,42 @@ class TransaksiModel extends Model
         $endDate = !empty($endDate) ? $endDate : date('Y-m-d');
         $row = $this->db->query(
             "SELECT COALESCE(SUM(total_bayar), 0) AS total_penjualan,
-                    COALESCE(SUM(total_margin), 0) AS total_margin
+                    COALESCE(SUM(total_margin), 0) AS total_margin,
+                    COUNT(id_transaksi) AS total_transaksi
              FROM transaksi
-             WHERE DATE(tanggal_transaksi) >= '$startDate' AND DATE(tanggal_transaksi) <= '$endDate'"
+             WHERE DATE(tanggal_transaksi) >= ? AND DATE(tanggal_transaksi) <= ?",
+            [$startDate, $endDate]
         )->getRowArray();
 
-        return $row ?? ['total_penjualan' => 0, 'total_margin' => 0];
+        return $row ?? ['total_penjualan' => 0, 'total_margin' => 0, 'total_transaksi' => 0];
+    }
+
+    public function getTopProducts($startDate = null, $endDate = null, $limit = 3)
+    {
+        $startDate = !empty($startDate) ? $startDate : date('Y-m-d');
+        $endDate = !empty($endDate) ? $endDate : date('Y-m-d');
+        $limit = max(1, (int)$limit);
+
+        return $this->db->query(
+            "SELECT b.nama_barang, COALESCE(SUM(dt.jumlah), 0) AS total_qty
+             FROM detail_transaksi dt
+             JOIN transaksi t ON t.id_transaksi = dt.id_transaksi
+             JOIN barang b ON b.id_barang = dt.id_barang
+             WHERE DATE(t.tanggal_transaksi) >= ? AND DATE(t.tanggal_transaksi) <= ?
+             GROUP BY b.id_barang, b.nama_barang
+             ORDER BY total_qty DESC, b.nama_barang ASC
+             LIMIT ?",
+            [$startDate, $endDate, $limit]
+        )->getResultArray();
+    }
+
+    public function getOne($id = '')
+    {
+        $x = $this->builder->select('a.*');
+        if ($id != '') {
+            $x->where('a.id_transaksi', $id);
+        }
+        return $x->get()->getRowArray();
     }
 
     public function store($data)

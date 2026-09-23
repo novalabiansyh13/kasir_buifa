@@ -3,14 +3,17 @@
 namespace App\Controllers\Auth;
 
 use App\Controllers\BaseController;
-use App\Models\Msuser;
+use App\Services\Auth\AuthService;
+use DomainException;
+use Exception;
 
 class LoginController extends BaseController
 {
-    protected $msuser;
-    public function __construct()
+    protected AuthService $authService;
+
+    public function __construct(?AuthService $authService = null)
     {
-        $this->msuser = new Msuser();
+        $this->authService = $authService ?? new AuthService();
     }
 
     public function index()
@@ -22,32 +25,43 @@ class LoginController extends BaseController
 
     public function process()
     {
-        $username = trim($this->getPost('username'));
-        $password = trim($this->getPost('password'));
-        if (empty($username) || empty($password)) {
-            return respondAndDie(false, 'Username dan password wajib diisi.');
+        $username = trim($this->getPost('username') ?? '');
+        $password = trim($this->getPost('password') ?? '');
+
+        try {
+            $user = $this->authService->authenticate($username, $password);
+            $this->authService->loginSession($user);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Login berhasil! Pengalihan halaman...',
+                'pesan'     => 'Login berhasil! Pengalihan halaman...',
+                'redirect'  => base_url('kasir'),
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (Exception $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Terjadi kesalahan sistem saat proses login.',
+                'pesan'     => 'Terjadi kesalahan sistem saat proses login.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $user = $this->msuser->getByUsername($username);
-        if (!$user) {
-            return respondAndDie(false, 'Username atau password salah.');
-        }
-        $passwordValid = password_verify($password, $user['password']) || ($password === $user['password']);
-        if (!$passwordValid) {
-            return respondAndDie(false, 'Username atau password salah.');
-        }
-        // Set Session login
-        setSession('userid', $user['userid']);
-        setSession('username', $user['username']);
-        setSession('fullname', $user['fullname']);
-        setSession('roleid', $user['roleid'] ?? 1);
-        setSession('role', $user['rolename'] ?? $user['role'] ?? 'Administrator');
-        setSession('photo', $user['photo'] ?? '');
-        return respondAndDie(true, 'Login berhasil! Pengalihan halaman...');
     }
 
     public function logout()
     {
-        destroySession();
-        return redirect()->to(base_url(''));
+        $this->authService->logout();
+        return redirect()->to(base_url('login'));
     }
 }

@@ -14,6 +14,7 @@ $routes->set404Override();
 
 $routes->get('/', 'Auth\LoginController::index', $this->noauth);
 $routes->group('login', function ($routes) {
+    $routes->get('/', 'Auth\LoginController::index', $this->noauth);
     $routes->add('process', 'Auth\LoginController::process', $this->noauth);
 });
 $routes->post('profile/update', 'Auth\ProfileController::update', $this->auth);
@@ -86,8 +87,15 @@ $routes->group('menu', function ($routes) {
 // kasir
 $routes->group('kasir', function ($routes) {
     $routes->add('', 'kasir\Kasir::index', $this->akses);
-    $routes->add('table', 'kasir\Kasir::datatable', $this->akses);
+    $routes->add('table', 'kasir\Riwayat::datatable', $this->akses);
     $routes->add('simpan', 'kasir\Kasir::simpan', $this->akses);
+});
+
+// riwayat transaksi
+$routes->group('riwayat', function ($routes) {
+    $routes->add('', 'kasir\Riwayat::index', $this->akses);
+    $routes->add('table', 'kasir\Riwayat::datatable', $this->akses);
+    $routes->add('detail/(:any)', 'kasir\Riwayat::detail/$1', $this->akses);
 });
 
 // dashboard omzet

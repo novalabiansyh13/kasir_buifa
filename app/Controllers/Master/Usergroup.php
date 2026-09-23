@@ -4,18 +4,26 @@ namespace App\Controllers\Master;
 
 use App\Controllers\BaseController;
 use App\Helpers\Datatables\Datatables;
-use App\Models\Msmenu;
 use App\Models\Msrole;
+use App\Services\Master\MenuService;
+use App\Services\Master\UsergroupService;
+use DomainException;
 use Exception;
 
 class Usergroup extends BaseController
 {
-    function __construct()
-    {
+    protected UsergroupService $usergroupService;
+    protected MenuService $menuService;
+    protected array $arrbc;
+
+    public function __construct(
+        ?UsergroupService $usergroupService = null,
+        ?MenuService $menuService = null
+    ) {
         $dataakses = sessionMenu('usergroup');
         $this->setArrayAccess($dataakses);
-        $this->role = new Msrole();
-        $this->menu = new Msmenu();
+        $this->usergroupService = $usergroupService ?? new UsergroupService();
+        $this->menuService = $menuService ?? new MenuService();
         $this->arrbc = [
             [
                 'Master',
@@ -24,13 +32,13 @@ class Usergroup extends BaseController
         ];
     }
 
-    function index()
+    public function index()
     {
         return view('master/usergroup/v_usergroup', [
-            'title' => 'Data User Group & Hak Akses',
+            'title'      => 'Data User Group & Hak Akses',
             'breadcrumb' => $this->arrbc,
-            'akses' => $this->getArrayAccess(),
-            'section' => 'Master User Group'
+            'akses'      => $this->getArrayAccess(),
+            'section'    => 'Master User Group'
         ]);
     }
 
@@ -61,195 +69,192 @@ class Usergroup extends BaseController
     {
         $form_type = (empty($id) ? 'add' : 'edit');
         $row = [];
-        if ($id != '') {
-            $id = decrypting($id);
-            $row = $this->role->getOne($id);
+        if ($id !== '') {
+            $idDec = (int) decrypting($id);
+            $row = $this->usergroupService->getOne($idDec) ?? [];
         }
         return view('master/usergroup/v_form', [
             'form_type' => $form_type,
-            'row' => $row
+            'row'       => $row
         ]);
     }
 
-    function addRole()
+    public function addRole()
     {
-        $rolename = trim($this->getPost('rolename') ?? '');
-        $res = [];
         $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $rolename = trim($this->getPost('rolename') ?? '');
+
         try {
-            if (empty($rolename)) {
-                throw new Exception("Nama role/user group tidak boleh kosong.");
-            }
-            $data = [
-                'rolename' => $rolename,
-            ];
-            $this->role->store($data);
-            $res = [
-                'sukses' => '1',
-                'pesan' => 'User Group baru berhasil ditambahkan.',
-            ];
-            $this->db->transCommit();
+            $this->usergroupService->store(['rolename' => $rolename]);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'User Group baru berhasil ditambahkan.',
+                'pesan'     => 'User Group baru berhasil ditambahkan.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Terjadi kesalahan saat menambahkan user group.',
+                'pesan'     => 'Terjadi kesalahan saat menambahkan user group.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
-    function updateRole()
+    public function updateRole()
     {
-        $id = decrypting($this->getPost('id'));
-        $rolename = trim($this->getPost('rolename') ?? '');
-        $res = [];
         $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $id = (int) decrypting($this->getPost('id'));
+        $rolename = trim($this->getPost('rolename') ?? '');
+
         try {
-            if (empty($id) || empty($rolename)) {
-                throw new Exception("Data user group belum lengkap.");
-            }
-            $data = [
-                'rolename' => $rolename,
-            ];
-            $this->role->edit($data, $id);
-            $res = [
-                'sukses' => '1',
-                'pesan' => 'User Group berhasil diperbarui.',
-            ];
-            $this->db->transCommit();
+            $this->usergroupService->update($id, ['rolename' => $rolename]);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'User Group berhasil diperbarui.',
+                'pesan'     => 'User Group berhasil diperbarui.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Terjadi kesalahan saat memperbarui user group.',
+                'pesan'     => 'Terjadi kesalahan saat memperbarui user group.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
-    function deleteRole()
+    public function deleteRole()
     {
-        $id = decrypting($this->getPost('id'));
-        $res = [];
         $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $id = (int) decrypting($this->getPost('id'));
+
         try {
-            if (empty($id)) {
-                throw new Exception("ID User Group tidak valid.");
-            }
-            if ((int)$id === 1) {
-                throw new Exception("User Group Administrator utama tidak boleh dihapus.");
-            }
-            $tables = [
-                ['table' => 'msuser', 'column' => 'roleid', 'value' => $id, 'alias' => 'User / Pengguna'],
-            ];
-            $getvalidate = validateDeleteData($tables);
-            if (!empty($getvalidate)) {
-                $aliases = array_unique(array_column($getvalidate, 'alias'));
-                $msg = "<div>User Group tidak dapat dihapus karena masih digunakan oleh:</div>";
-                $msg .= "<ul style='margin: 0; padding-left: 20px;'>";
-                foreach ($aliases as $alias) {
-                    $msg .= "<li>" . $alias . "</li>";
-                }
-                $msg .= "</ul>";
-                throw new Exception($msg);
-            }
-            $this->role->destroy($id);
-            $this->db->table('msaccessmenu')->where('roleid', (int) $id)->delete();
-            $res['sukses'] = '1';
-            $res['pesan'] = 'User Group berhasil dihapus.';
-            $this->db->transCommit();
+            $this->usergroupService->delete($id);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'User Group berhasil dihapus.',
+                'pesan'     => 'User Group berhasil dihapus.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => (!empty($e->getMessage())) ? $e->getMessage() : "User Group gagal dihapus."
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'User Group gagal dihapus.',
+                'pesan'     => 'User Group gagal dihapus.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
     public function formAccess($roleidEnc = "")
     {
-        $roleid = decrypting($roleidEnc);
-        $role = $this->role->getOne($roleid);
+        $roleid = (int) decrypting($roleidEnc);
+        $role = $this->usergroupService->getOne($roleid);
         if (empty($role)) {
             echo "<div class='p-4 text-rose-500 text-xs font-bold'>User Group tidak ditemukan.</div>";
             return;
         }
 
-        $allMenuTree = $this->menu->getAllMenuTree();
-        $currentAccess = $this->role->getAccessMenu($roleid);
+        $allMenuTree = $this->menuService->getAllMenuTree();
+        $currentAccess = $this->usergroupService->getAccessMenu($roleid);
         $selectedMenuIds = array_column($currentAccess, 'menuid');
 
         return view('master/usergroup/v_access', [
-            'role' => $role,
-            'roleidEnc' => $roleidEnc,
-            'menuTree' => $allMenuTree,
+            'role'            => $role,
+            'roleidEnc'       => $roleidEnc,
+            'menuTree'        => $allMenuTree,
             'selectedMenuIds' => $selectedMenuIds
         ]);
     }
 
     public function saveAccess()
     {
-        $roleid = decrypting($this->getPost('roleid'));
-        $menus = $this->getPost('menus') ?? [];
-        $res = [];
         $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $roleid = (int) decrypting($this->getPost('roleid'));
+        $menus = $this->getPost('menus') ?? [];
+
         try {
-            if (empty($roleid)) {
-                throw new Exception("Role ID tidak valid.");
-            }
-            $this->role->saveAccessMenu($roleid, $menus);
-            $res = [
-                'sukses' => '1',
-                'pesan' => 'Hak akses menu berhasil disimpan.',
-            ];
-            $this->db->transCommit();
+            $this->usergroupService->saveAccess($roleid, $menus);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Hak akses menu berhasil disimpan.',
+                'pesan'     => 'Hak akses menu berhasil disimpan.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Gagal menyimpan hak akses menu.',
+                'pesan'     => 'Gagal menyimpan hak akses menu.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
     public function getRole($stmt = '')
     {
         $this->response->setContentType('application/json');
         $search = $this->getPost('searchTerm') ?? '';
-        $builder = $this->role->builder->select('a.roleid, a.rolename');
-        if (!empty($search)) {
-            $cari = strtolower(trim($search));
-            $builder->where("lower(a.rolename) like '%" . $cari . "%'", null, false);
-        }
-        $get = $builder->orderBy('a.roleid', 'ASC')->get()->getResultArray();
+        $get = $this->usergroupService->getSelectOptions($search);
 
         $arr = [];
         foreach ($get as $g) {
             $arr[] = [
-                'id' => (empty($stmt) ? encrypting($g['roleid']) : $g['roleid']),
+                'id'   => (empty($stmt) ? encrypting($g['roleid']) : $g['roleid']),
                 'text' => $g['rolename']
             ];
         }
-        echo encode([
-            'data' => $arr,
+
+        return $this->response->setJSON([
+            'data'      => $arr,
             'csrfToken' => csrf_hash(),
-            'trace' => db_connect()->error(),
         ]);
     }
 }

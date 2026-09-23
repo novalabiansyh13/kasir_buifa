@@ -4,18 +4,26 @@ namespace App\Controllers\Master;
 
 use App\Controllers\BaseController;
 use App\Helpers\Datatables\Datatables;
-use App\Models\Msrole;
 use App\Models\Msuser;
+use App\Services\Master\UserService;
+use App\Services\Master\UsergroupService;
+use DomainException;
 use Exception;
 
 class User extends BaseController
 {
-    function __construct()
-    {
+    protected UserService $userService;
+    protected UsergroupService $usergroupService;
+    protected array $arrbc;
+
+    public function __construct(
+        ?UserService $userService = null,
+        ?UsergroupService $usergroupService = null
+    ) {
         $dataakses = sessionMenu('user');
         $this->setArrayAccess($dataakses);
-        $this->user = new Msuser();
-        $this->role = new Msrole();
+        $this->userService = $userService ?? new UserService();
+        $this->usergroupService = $usergroupService ?? new UsergroupService();
         $this->arrbc = [
             [
                 'Master',
@@ -24,13 +32,13 @@ class User extends BaseController
         ];
     }
 
-    function index()
+    public function index()
     {
         return view('master/user/v_user', [
-            'title' => 'Data User Pengguna',
+            'title'      => 'Data User Pengguna',
             'breadcrumb' => $this->arrbc,
-            'akses' => $this->getArrayAccess(),
-            'section' => 'Master User'
+            'akses'      => $this->getArrayAccess(),
+            'section'    => 'Master User'
         ]);
     }
 
@@ -72,20 +80,21 @@ class User extends BaseController
     {
         $form_type = (empty($id) ? 'add' : 'edit');
         $row = [];
-        if ($id != '') {
-            $id = decrypting($id);
-            $row = $this->user->getOne($id);
+        if ($id !== '') {
+            $idDec = (int) decrypting($id);
+            $row = $this->userService->getOne($idDec) ?? [];
         }
-        $roles = $this->role->getAll();
+        $roles = $this->usergroupService->getAll();
         return view('master/user/v_form', [
             'form_type' => $form_type,
-            'row' => $row,
-            'roles' => $roles
+            'row'       => $row,
+            'roles'     => $roles
         ]);
     }
 
-    function addUser()
+    public function addUser()
     {
+        $this->response->setContentType('application/json');
         $username = trim($this->getPost('username') ?? '');
         $fullname = trim($this->getPost('fullname') ?? '');
         $password = trim($this->getPost('password') ?? '');
@@ -95,54 +104,48 @@ class User extends BaseController
         } else {
             $roleid = (int) $roleid;
         }
-        $is_active = $this->getPost('is_active') ? true : false;
-        $res = [];
-        $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $isActive = !empty($this->getPost('is_active'));
+        $filePhoto = $this->request->getFile('photo');
+
         try {
-            if (empty($username) || empty($fullname) || empty($password)) {
-                throw new Exception("Username, nama lengkap, dan password wajib diisi.");
-            }
-            $existing = $this->user->getByUsername($username);
-            if (!empty($existing)) {
-                throw new Exception("Username sudah digunakan, silakan pilih username lain.");
-            }
-            $data = [
-                'username' => $username,
-                'fullname' => $fullname,
-                'password' => password_hash($password, PASSWORD_DEFAULT),
-                'roleid' => (int) $roleid,
-                'is_active' => $is_active,
-            ];
+            $this->userService->store([
+                'username'  => $username,
+                'fullname'  => $fullname,
+                'password'  => $password,
+                'roleid'    => $roleid,
+                'is_active' => $isActive,
+            ], $filePhoto);
 
-            $filePhoto = $this->request->getFile('photo');
-            if ($filePhoto && $filePhoto->isValid() && !$filePhoto->hasMoved()) {
-                $newName = $filePhoto->getRandomName();
-                $filePhoto->move(FCPATH . 'uploads/profile', $newName);
-                $data['photo'] = $newName;
-            }
-
-            $this->user->store($data);
-            $res = [
-                'sukses' => '1',
-                'pesan' => 'User baru berhasil ditambahkan.',
-            ];
-            $this->db->transCommit();
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'User baru berhasil ditambahkan.',
+                'pesan'     => 'User baru berhasil ditambahkan.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Terjadi kesalahan saat menambahkan user.',
+                'pesan'     => 'Terjadi kesalahan saat menambahkan user.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
-    function updateUser()
+    public function updateUser()
     {
-        $id = decrypting($this->getPost('id'));
+        $this->response->setContentType('application/json');
+        $id = (int) decrypting($this->getPost('id'));
         $fullname = trim($this->getPost('fullname') ?? '');
         $password = trim($this->getPost('password') ?? '');
         $roleid = $this->getPost('roleid') ?? 2;
@@ -151,83 +154,76 @@ class User extends BaseController
         } else {
             $roleid = (int) $roleid;
         }
-        $is_active = $this->getPost('is_active') ? true : false;
+        $isActive = !empty($this->getPost('is_active'));
+        $filePhoto = $this->request->getFile('photo');
 
-        $res = [];
-        $this->response->setContentType('application/json');
-        $this->db->transBegin();
         try {
-            if (empty($id) || empty($fullname)) {
-                throw new Exception("Data user belum lengkap.");
-            }
+            $this->userService->update($id, [
+                'fullname'  => $fullname,
+                'password'  => $password,
+                'roleid'    => $roleid,
+                'is_active' => $isActive,
+            ], $filePhoto);
 
-            $data = [
-                'fullname' => $fullname,
-                'roleid' => (int) $roleid,
-                'is_active' => $is_active,
-            ];
-
-            if (!empty($password)) {
-                $data['password'] = password_hash($password, PASSWORD_DEFAULT);
-            }
-
-            // Handle photo upload
-            $filePhoto = $this->request->getFile('photo');
-            if ($filePhoto && $filePhoto->isValid() && !$filePhoto->hasMoved()) {
-                $newName = $filePhoto->getRandomName();
-                $filePhoto->move(FCPATH . 'uploads/profile', $newName);
-                $data['photo'] = $newName;
-            }
-
-            $this->user->edit($data, $id);
-            $res = [
-                'sukses' => '1',
-                'pesan' => 'Data user berhasil diperbarui.',
-            ];
-            $this->db->transCommit();
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Data user berhasil diperbarui.',
+                'pesan'     => 'Data user berhasil diperbarui.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Terjadi kesalahan saat memperbarui data user.',
+                'pesan'     => 'Terjadi kesalahan saat memperbarui data user.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
-    function deleteUser()
+    public function deleteUser()
     {
-        $id = decrypting($this->getPost('id'));
-        $res = [];
         $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $id = (int) decrypting($this->getPost('id'));
+        $currentUserId = (int) getSession('userid');
+
         try {
-            if (empty($id)) {
-                throw new Exception("ID user tidak valid.");
-            }
-            if ((int)$id === 1) {
-                throw new Exception("User Administrator utama (ID 1) tidak boleh dihapus.");
-            }
-            $currentUserId = getSession('userid');
-            if ((int)$id === (int)$currentUserId) {
-                throw new Exception("Anda tidak dapat menghapus akun Anda sendiri yang sedang aktif.");
-            }
-            $this->user->destroy($id);
-            $res['sukses'] = '1';
-            $res['pesan'] = 'User berhasil dihapus.';
-            $this->db->transCommit();
+            $this->userService->delete($id, $currentUserId);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'User berhasil dihapus.',
+                'pesan'     => 'User berhasil dihapus.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => (!empty($e->getMessage())) ? $e->getMessage() : "User gagal dihapus."
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'User gagal dihapus.',
+                'pesan'     => 'User gagal dihapus.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
     public function formRole($id = "")
@@ -235,50 +231,56 @@ class User extends BaseController
         if (empty($id)) {
             return "ID User tidak valid.";
         }
-        $idDec = decrypting($id);
-        $user = $this->user->getOne($idDec);
+        $idDec = (int) decrypting($id);
+        $user = $this->userService->getOne($idDec);
         if (!$user) {
             return "Data user tidak ditemukan.";
         }
-        $roles = $this->role->getAll();
+        $roles = $this->usergroupService->getAll();
         return view('master/user/v_form_role', [
             'idEnc' => $id,
-            'row' => $user,
+            'row'   => $user,
             'roles' => $roles
         ]);
     }
 
     public function saveRole()
     {
-        $id = decrypting($this->getPost('id'));
+        $this->response->setContentType('application/json');
+        $id = (int) decrypting($this->getPost('id'));
         $roleid = $this->getPost('roleid');
         if (!empty($roleid) && !is_numeric($roleid)) {
             $roleid = (int) decrypting($roleid);
         } else {
             $roleid = (int) $roleid;
         }
-        $res = [];
-        $this->response->setContentType('application/json');
-        $this->db->transBegin();
+
         try {
-            if (empty($id) || empty($roleid)) {
-                throw new Exception("Data pengguna atau role tidak valid.");
-            }
-            $this->user->setRole($id, $roleid);
-            $res = [
-                'sukses' => '1',
-                'pesan' => 'Role user berhasil diperbarui.',
-            ];
-            $this->db->transCommit();
+            $this->userService->setRole($id, $roleid);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Role user berhasil diperbarui.',
+                'pesan'     => 'Role user berhasil diperbarui.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Gagal memperbarui role user.',
+                'pesan'     => 'Gagal memperbarui role user.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 }

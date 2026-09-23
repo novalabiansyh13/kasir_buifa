@@ -5,15 +5,20 @@ namespace App\Controllers\Master;
 use App\Controllers\BaseController;
 use App\Helpers\Datatables\Datatables;
 use App\Models\Msmenu;
+use App\Services\Master\MenuService;
+use DomainException;
 use Exception;
 
 class Menu extends BaseController
 {
-    function __construct()
+    protected MenuService $menuService;
+    protected array $arrbc;
+
+    public function __construct(?MenuService $menuService = null)
     {
         $dataakses = sessionMenu('menu');
         $this->setArrayAccess($dataakses);
-        $this->menu = new Msmenu();
+        $this->menuService = $menuService ?? new MenuService();
         $this->arrbc = [
             [
                 'Master',
@@ -22,13 +27,13 @@ class Menu extends BaseController
         ];
     }
 
-    function index()
+    public function index()
     {
         return view('master/menu/v_menu', [
-            'title' => 'Data Master Menu',
+            'title'      => 'Data Master Menu',
             'breadcrumb' => $this->arrbc,
-            'akses' => $this->getArrayAccess(),
-            'section' => 'Master Menu'
+            'akses'      => $this->getArrayAccess(),
+            'section'    => 'Master Menu'
         ]);
     }
 
@@ -66,18 +71,19 @@ class Menu extends BaseController
     {
         $form_type = (empty($id) ? 'add' : 'edit');
         $row = [];
-        if ($id != '') {
-            $id = decrypting($id);
-            $row = $this->menu->getOne($id);
+        if ($id !== '') {
+            $idDec = (int) decrypting($id);
+            $row = $this->menuService->getOne($idDec) ?? [];
         }
         return view('master/menu/v_form', [
             'form_type' => $form_type,
-            'row' => $row
+            'row'       => $row
         ]);
     }
 
-    function addMenu()
+    public function addMenu()
     {
+        $this->response->setContentType('application/json');
         $menuname = trim($this->getPost('menuname') ?? '');
         $url = trim($this->getPost('url') ?? '');
         $icon = trim($this->getPost('icon') ?? 'bi bi-grid');
@@ -87,53 +93,47 @@ class Menu extends BaseController
         } else {
             $parentid = (int) $parentid;
         }
-        $is_active = $this->getPost('is_active') ? true : false;
-        $res = [];
-        $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $isActive = !empty($this->getPost('is_active'));
+
         try {
-            if (empty($menuname) || empty($url)) {
-                throw new Exception("Nama menu dan URL wajib diisi.");
-            }
-            $maxSeq = $this->menu->builder->selectMax('sequence')->get()->getRowArray();
-            $nextSeq = ((int) ($maxSeq['sequence'] ?? 0)) + 1;
-            $data = [
-                'menuname' => $menuname,
-                'url' => $url,
-                'icon' => $icon,
-                'parentid' => $parentid,
-                'sequence' => $nextSeq,
-                'is_active' => $is_active,
-            ];
-            $this->menu->store($data);
-            $newMenuId = $this->db->insertID();
-            $this->db->table('msaccessmenu')->insert([
-                'roleid' => 1,
-                'menuid' => $newMenuId,
-                'createdby' => getCurrentUsername(),
-                'createddate' => date('Y-m-d H:i:s')
+            $this->menuService->store([
+                'menuname'  => $menuname,
+                'url'       => $url,
+                'icon'      => $icon,
+                'parentid'  => $parentid,
+                'is_active' => $isActive,
             ]);
 
-            $res = [
-                'sukses' => '1',
-                'pesan' => 'Menu baru berhasil ditambahkan.',
-            ];
-            $this->db->transCommit();
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Menu baru berhasil ditambahkan.',
+                'pesan'     => 'Menu baru berhasil ditambahkan.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Terjadi kesalahan saat menambahkan menu.',
+                'pesan'     => 'Terjadi kesalahan saat menambahkan menu.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
-    function updateMenu()
+    public function updateMenu()
     {
-        $id = decrypting($this->getPost('id'));
+        $this->response->setContentType('application/json');
+        $id = (int) decrypting($this->getPost('id'));
         $menuname = trim($this->getPost('menuname') ?? '');
         $url = trim($this->getPost('url') ?? '');
         $icon = trim($this->getPost('icon') ?? 'bi bi-grid');
@@ -143,69 +143,80 @@ class Menu extends BaseController
         } else {
             $parentid = (int) $parentid;
         }
-        $is_active = $this->getPost('is_active') ? true : false;
-        $res = [];
-        $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $isActive = !empty($this->getPost('is_active'));
+
         try {
-            if (empty($id) || empty($menuname) || empty($url)) {
-                throw new Exception("Data menu belum lengkap.");
-            }
-            $data = [
-                'menuname' => $menuname,
-                'url' => $url,
-                'icon' => $icon,
-                'parentid' => $parentid,
-                'is_active' => $is_active,
-            ];
-            $this->menu->edit($data, $id);
-            $res = [
-                'sukses' => '1',
-                'pesan' => 'Menu berhasil diperbarui.',
-            ];
-            $this->db->transCommit();
+            $this->menuService->update($id, [
+                'menuname'  => $menuname,
+                'url'       => $url,
+                'icon'      => $icon,
+                'parentid'  => $parentid,
+                'is_active' => $isActive,
+            ]);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Menu berhasil diperbarui.',
+                'pesan'     => 'Menu berhasil diperbarui.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Terjadi kesalahan saat memperbarui menu.',
+                'pesan'     => 'Terjadi kesalahan saat memperbarui menu.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
-    function deleteMenu()
+    public function deleteMenu()
     {
-        $id = decrypting($this->getPost('id'));
-        $res = [];
         $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $id = (int) decrypting($this->getPost('id'));
+
         try {
-            if (empty($id)) {
-                throw new Exception("ID menu tidak valid.");
-            }
-            $this->menu->destroy($id);
-            $this->db->table('msaccessmenu')->where('menuid', (int) $id)->delete();
-            $res['sukses'] = '1';
-            $res['pesan'] = 'Menu berhasil dihapus.';
-            $this->db->transCommit();
+            $this->menuService->delete($id);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Menu berhasil dihapus.',
+                'pesan'     => 'Menu berhasil dihapus.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => (!empty($e->getMessage())) ? $e->getMessage() : "Menu gagal dihapus."
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Menu gagal dihapus.',
+                'pesan'     => 'Menu gagal dihapus.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
     public function formSort()
     {
-        $menuTree = $this->menu->getAllMenuTree();
+        $menuTree = $this->menuService->getAllMenuTree();
         return view('master/menu/v_sort', [
             'menuTree' => $menuTree
         ]);
@@ -213,35 +224,57 @@ class Menu extends BaseController
 
     public function saveOrder()
     {
-        $orderData = $this->getPost('order');
-        $res = [];
         $this->response->setContentType('application/json');
-        $this->db->transBegin();
-        try {
-            if (empty($orderData)) {
-                throw new Exception("Struktur urutan menu kosong.");
-            }
-            $items = json_decode($orderData, true);
-            if (!is_array($items)) {
-                throw new Exception("Format data urutan tidak valid.");
-            }
-            $seq = 1;
-            $this->menu->saveOrderRecursive($items, 0, $seq);
-            $res = [
-                'sukses' => '1',
-                'pesan' => 'Urutan dan hierarki menu berhasil disimpan.',
-            ];
-            $this->db->transCommit();
-        } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-            ];
-            $this->db->transRollback();
+        $orderData = $this->getPost('order');
+
+        if (empty($orderData)) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Struktur urutan menu kosong.',
+                'pesan'     => 'Struktur urutan menu kosong.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
+
+        $items = json_decode($orderData, true);
+        if (!is_array($items)) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Format data urutan tidak valid.',
+                'pesan'     => 'Format data urutan tidak valid.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        }
+
+        try {
+            $this->menuService->saveOrder($items);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Urutan dan hierarki menu berhasil disimpan.',
+                'pesan'     => 'Urutan dan hierarki menu berhasil disimpan.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (Exception $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Gagal menyimpan urutan menu.',
+                'pesan'     => 'Gagal menyimpan urutan menu.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        }
     }
 
     public function getMenu($stmt = '')
@@ -249,35 +282,28 @@ class Menu extends BaseController
         $this->response->setContentType('application/json');
         $search = $this->getPost('searchTerm') ?? '';
         $exceptId = $this->getPost('exceptId') ?? '';
-        if (!empty($exceptId) && !is_numeric($exceptId)) {
-            $exceptId = decrypting($exceptId);
+        $excIdInt = null;
+        if (!empty($exceptId)) {
+            $excIdInt = !is_numeric($exceptId) ? (int) decrypting($exceptId) : (int) $exceptId;
         }
 
-        $builder = $this->menu->builder->select('a.menuid, a.menuname, a.url, a.icon');
-        if (!empty($exceptId) && is_numeric($exceptId)) {
-            $builder->where('a.menuid !=', (int) $exceptId);
-        }
-        if (!empty($search)) {
-            $cari = strtolower(trim($search));
-            $builder->where("(lower(a.menuname) like '%" . $cari . "%' or lower(a.url) like '%" . $cari . "%')", null, false);
-        }
-        $get = $builder->orderBy('a.sequence', 'ASC')->get()->getResultArray();
+        $get = $this->menuService->getSelectOptions($search, $excIdInt);
 
         $arr = [];
         $arr[] = [
-            'id' => (empty($stmt) ? encrypting(0) : 0),
+            'id'   => (empty($stmt) ? encrypting(0) : 0),
             'text' => ''
         ];
         foreach ($get as $g) {
             $arr[] = [
-                'id' => (empty($stmt) ? encrypting($g['menuid']) : $g['menuid']),
+                'id'   => (empty($stmt) ? encrypting($g['menuid']) : $g['menuid']),
                 'text' => $g['menuname'] . ' (' . $g['url'] . ')'
             ];
         }
-        echo encode([
-            'data' => $arr,
+
+        return $this->response->setJSON([
+            'data'      => $arr,
             'csrfToken' => csrf_hash(),
-            'trace' => db_connect()->error(),
         ]);
     }
 }

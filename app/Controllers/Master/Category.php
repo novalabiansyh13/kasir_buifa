@@ -5,15 +5,20 @@ namespace App\Controllers\Master;
 use App\Controllers\BaseController;
 use App\Helpers\Datatables\Datatables;
 use App\Models\CategoryModel;
+use App\Services\Master\CategoryService;
+use DomainException;
 use Exception;
 
 class Category extends BaseController
 {
-    function __construct()
+    protected CategoryService $categoryService;
+    protected array $arrbc;
+
+    public function __construct(?CategoryService $categoryService = null)
     {
         $dataakses = sessionMenu('category');
         $this->setArrayAccess($dataakses);
-        $this->category = new CategoryModel();
+        $this->categoryService = $categoryService ?? new CategoryService();
         $this->arrbc = [
             [
                 'Master',
@@ -22,13 +27,13 @@ class Category extends BaseController
         ];
     }
 
-    function index()
+    public function index()
     {
         return view('master/category/v_category', [
-            'title' => 'Data Kategori Produk',
+            'title'      => 'Data Kategori Produk',
             'breadcrumb' => $this->arrbc,
-            'akses' => $this->getArrayAccess(),
-            'section' => 'Kategori Produk'
+            'akses'      => $this->getArrayAccess(),
+            'section'    => 'Kategori Produk'
         ]);
     }
 
@@ -60,116 +65,116 @@ class Category extends BaseController
     {
         $form_type = (empty($id) ? 'add' : 'edit');
         $row = [];
-        if ($id != '') {
-            $id = decrypting($id);
-            $row = $this->category->getOne($id);
+        if ($id !== '') {
+            $idDec = (int) decrypting($id);
+            $row = $this->categoryService->getOne($idDec) ?? [];
         }
         return view('master/category/v_form', [
             'form_type' => $form_type,
-            'row' => $row
+            'row'       => $row
         ]);
     }
 
-    function addCategory()
+    public function addCategory()
     {
-        $categoryname = trim($this->getPost('categoryname') ?? '');
-        $res = [];
         $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $categoryname = trim($this->getPost('categoryname') ?? '');
+
         try {
-            if (empty($categoryname)) {
-                throw new Exception("Nama kategori tidak boleh kosong.");
-            }
-            $data = [
-                'categoryname' => $categoryname,
-            ];
-            $this->category->store($data);
-            $res = [
-                'sukses' => '1',
-                'pesan' => 'Kategori baru berhasil ditambahkan.',
-            ];
-            $this->db->transCommit();
+            $this->categoryService->store(['categoryname' => $categoryname]);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Kategori baru berhasil ditambahkan.',
+                'pesan'     => 'Kategori baru berhasil ditambahkan.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Terjadi kesalahan saat menambahkan kategori.',
+                'pesan'     => 'Terjadi kesalahan saat menambahkan kategori.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
-    function updateCategory()
+    public function updateCategory()
     {
-        $id = decrypting($this->getPost('id'));
-        $categoryname = trim($this->getPost('categoryname') ?? '');
-        $res = [];
         $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $id = (int) decrypting($this->getPost('id'));
+        $categoryname = trim($this->getPost('categoryname') ?? '');
+
         try {
-            if (empty($id) || empty($categoryname)) {
-                throw new Exception("Data kategori belum lengkap.");
-            }
-            $data = [
-                'categoryname' => $categoryname,
-            ];
-            $this->category->edit($data, $id);
-            $res = [
-                'sukses' => '1',
-                'pesan' => 'Kategori berhasil diperbarui.',
-            ];
-            $this->db->transCommit();
+            $this->categoryService->update($id, ['categoryname' => $categoryname]);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Kategori berhasil diperbarui.',
+                'pesan'     => 'Kategori berhasil diperbarui.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Terjadi kesalahan saat memperbarui kategori.',
+                'pesan'     => 'Terjadi kesalahan saat memperbarui kategori.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 
-    function deleteCategory()
+    public function deleteCategory()
     {
-        $id = decrypting($this->getPost('id'));
-        $res = [];
         $this->response->setContentType('application/json');
-        $this->db->transBegin();
+        $id = (int) decrypting($this->getPost('id'));
+
         try {
-            if (empty($id)) {
-                throw new Exception("ID kategori tidak valid.");
-            }
-            $tables = [
-                ['table' => 'barang', 'column' => 'categoryid', 'value' => $id, 'alias' => 'Produk / Barang'],
-            ];
-            $getvalidate = validateDeleteData($tables);
-            if (!empty($getvalidate)) {
-                $aliases = array_unique(array_column($getvalidate, 'alias'));
-                $msg = "<div>Kategori tidak dapat dihapus karena masih digunakan di:</div>";
-                $msg .= "<ul style='margin: 0; padding-left: 20px;'>";
-                foreach ($aliases as $alias) {
-                    $msg .= "<li>" . $alias . "</li>";
-                }
-                $msg .= "</ul>";
-                throw new Exception($msg);
-            }
-            $this->category->destroy($id);
-            $res['sukses'] = '1';
-            $res['pesan'] = 'Kategori berhasil dihapus.';
-            $this->db->transCommit();
+            $this->categoryService->delete($id);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Kategori berhasil dihapus.',
+                'pesan'     => 'Kategori berhasil dihapus.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
         } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => (!empty($e->getMessage())) ? $e->getMessage() : "Kategori gagal dihapus."
-            ];
-            $this->db->transRollback();
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Kategori gagal dihapus.',
+                'pesan'     => 'Kategori gagal dihapus.',
+                'csrfToken' => csrf_hash(),
+            ]);
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
     }
 }

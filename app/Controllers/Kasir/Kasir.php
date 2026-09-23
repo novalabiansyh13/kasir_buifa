@@ -3,135 +3,91 @@
 namespace App\Controllers\Kasir;
 
 use App\Controllers\BaseController;
-use App\Helpers\Datatables\Datatables;
-use App\Models\BarangModel;
-use App\Models\DetailTransaksiModel;
-use App\Models\TransaksiModel;
+use App\Services\Kasir\KasirService;
+use DomainException;
 use Exception;
 
 class Kasir extends BaseController
 {
-    function __construct()
+    protected KasirService $kasirService;
+    protected array $arrbc;
+
+    public function __construct(?KasirService $kasirService = null)
     {
         $dataakses = sessionMenu('kasir');
         $this->setArrayAccess($dataakses);
-        $this->barang = new BarangModel();
-        $this->transaksi = new TransaksiModel();
-        $this->detail = new DetailTransaksiModel();
+        $this->kasirService = $kasirService ?? new KasirService();
         $this->arrbc = [
             [
-                'Dashboard',
+                'Transaction',
                 'Kasir',
             ]
         ];
     }
 
-    function index()
+    public function index()
     {
         return view('kasir/v_kasir', [
-            'title' => 'Kasir Pintar Bu Ifa',
+            'title'      => 'Kasir Pintar Bu Ifa &bull; Terminal POS',
             'breadcrumb' => $this->arrbc,
-            'akses' => $this->getArrayAccess(),
-            'section' => 'Kasir'
+            'akses'      => $this->getArrayAccess(),
+            'section'    => 'Transaction',
         ]);
     }
 
-    public function datatable()
+    public function simpan()
     {
         $this->response->setContentType('application/json');
-        $startDate = $this->getPost('start_date') ?: date('Y-m-d');
-        $endDate = $this->getPost('end_date') ?: date('Y-m-d');
+        $rawItems = $this->getPost('items');
 
-        $ringkasan = $this->transaksi->getRingkasan($startDate, $endDate);
-        $table = Datatables::method([TransaksiModel::class, 'getRekap'], 'searchable')
-            ->setParams([$startDate, $endDate])
-            ->make();
-        $table->updateRow(function ($db, $no) {
-            return [
-                $no,
-                "<span class='px-2 py-0.5 rounded-md font-mono text-[11px] font-bold bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 inline-flex items-center gap-1'><i class='bi bi-calendar3 text-[10px] text-sky-600 dark:text-cyan-400'></i>" . $db->tanggal . "</span>",
-                "<span class='px-2 py-0.5 rounded-md font-mono text-[11px] font-bold bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 inline-flex items-center gap-1'><i class='bi bi-clock text-[10px] text-amber-500'></i>" . $db->jam . "</span>",
-                "<span class='font-medium text-slate-800 dark:text-slate-200'>" . esc($db->detail_barang) . "</span>",
-                "<span class='font-bold font-mono text-sky-600 dark:text-cyan-400'>" . idr($db->total_bayar) . "</span>",
-                "<span class='font-bold font-mono text-amber-600 dark:text-amber-400'>" . idr($db->total_margin) . "</span>",
-            ];
-        });
-        $table->toJson([
-            'total_penjualan' => (float) $ringkasan['total_penjualan'],
-            'total_margin' => (float) $ringkasan['total_margin'],
-        ]);
-    }
-
-    function simpan()
-    {
-        $items = $this->getPost('items');
-        $res = array();
-        $this->response->setContentType('application/json');
-        $this->db->transBegin();
-        try {
-            if (empty($items)) {
-                throw new Exception("Keranjang belanja masih kosong.");
-            }
-            $items = json_decode($items, true);
-            if (empty($items) || !is_array($items)) {
-                throw new Exception("Format data item transaksi tidak valid.");
-            }
-            $totalBayar = 0;
-            $totalMargin = 0;
-            $detailRows = [];
-            foreach ($items as $item) {
-                $idItem = !empty($item['id_barang']) ? $item['id_barang'] : ($item['id'] ?? null);
-                if (empty($idItem)) {
-                    continue;
-                }
-                $rawId = is_numeric($idItem) ? (int)$idItem : decrypting($idItem);
-                $barang = $this->barang->getOne($rawId);
-                if (empty($barang)) {
-                    continue;
-                }
-                $jumlah = max(1, (int) ($item['jumlah'] ?? $item['qty'] ?? 1));
-                $hargaJual = (float) $barang['harga_jual'];
-                $marginSatuan = (float) $barang['margin'];
-                $totalBayar += $hargaJual * $jumlah;
-                $totalMargin += $marginSatuan * $jumlah;
-                $detailRows[] = [
-                    'id_barang' => $barang['id_barang'],
-                    'jumlah' => $jumlah,
-                    'harga_jual_satuan' => $hargaJual,
-                    'margin_satuan' => $marginSatuan,
-                    'subtotal_harga' => $hargaJual * $jumlah,
-                    'subtotal_margin' => $marginSatuan * $jumlah,
-                ];
-            }
-            if (empty($detailRows)) {
-                throw new Exception("Tidak ada produk valid yang ditemukan di keranjang.");
-            }
-            $this->transaksi->store([
-                'total_bayar' => $totalBayar,
-                'total_margin' => $totalMargin,
+        if (empty($rawItems)) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Keranjang belanja masih kosong.',
+                'pesan'     => 'Keranjang belanja masih kosong.',
+                'csrfToken' => csrf_hash(),
             ]);
-            $idTransaksi = $this->db->insertID();
-            foreach ($detailRows as &$row) {
-                $row['id_transaksi'] = $idTransaksi;
-            }
-            unset($row);
-            $this->detail->storeBatch($detailRows);
-            $res = [
-                'pesan' => 'Transaksi kasir berhasil disimpan!',
-                'sukses' => '1',
-                'trace' => db_connect()->error(),
-            ];
-            $this->db->transCommit();
-        } catch (Exception $e) {
-            $res = [
-                'sukses' => '0',
-                'pesan' => $e->getMessage(),
-                'traceString' => $e->getTraceAsString(),
-            ];
-            $this->db->transRollback();
         }
-        $this->db->transComplete();
-        $res['csrfToken'] = csrf_hash();
-        echo json_encode($res);
+
+        $items = is_array($rawItems) ? $rawItems : json_decode($rawItems, true);
+        if (!is_array($items)) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Format data item transaksi tidak valid.',
+                'pesan'     => 'Format data item transaksi tidak valid.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        }
+
+        try {
+            $result = $this->kasirService->simpanTransaksi($items);
+
+            return $this->response->setJSON([
+                'success'   => true,
+                'sukses'    => '1',
+                'msg'       => 'Transaksi kasir berhasil disimpan!',
+                'pesan'     => 'Transaksi kasir berhasil disimpan!',
+                'data'      => $result,
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (DomainException $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => $e->getMessage(),
+                'pesan'     => $e->getMessage(),
+                'csrfToken' => csrf_hash(),
+            ]);
+        } catch (Exception $e) {
+            return $this->response->setJSON([
+                'success'   => false,
+                'sukses'    => '0',
+                'msg'       => 'Terjadi kesalahan sistem saat menyimpan transaksi.',
+                'pesan'     => 'Terjadi kesalahan sistem saat menyimpan transaksi.',
+                'csrfToken' => csrf_hash(),
+            ]);
+        }
     }
 }

@@ -123,5 +123,16 @@ node_modules/
 # Visual Studio Code
 .vscode/
 
+# Agent metadata
+.superpowers/
+.agents/
+
 /results/
 /phpunit.xml
+
+# Documentation
+docs/
+
+# User uploads
+public/uploads/
+
