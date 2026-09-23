@@ -31,11 +31,11 @@
         <!-- Kolom Kiri: Input Produk -->
         <div class="lg:col-span-5 space-y-4">
             <div class="card shadow-sm border border-slate-200/80 dark:border-slate-700 rounded-[14px] overflow-hidden bg-white dark:bg-slate-800">
-                <div class="bg-[#0284c7] text-white flex items-center justify-between px-4 py-3 font-bold text-xs sm:text-sm">
-                    <span class="flex items-center gap-2">
-                        <i class="bi bi-cart-plus-fill text-base"></i> Input Barang Belanja
+                <div class="bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 py-3 font-bold text-xs sm:text-sm">
+                    <span class="flex items-center gap-2 text-slate-900 dark:text-white">
+                        <i class="bi bi-cart-plus-fill text-sky-600 dark:text-sky-400 text-base"></i> Input Barang Belanja
                     </span>
-                    <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-normal">Form Transaksi</span>
+                    <span class="text-[10px] bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full font-semibold">Form Transaksi</span>
                 </div>
                 <div class="p-4 space-y-4">
                     <div>
@@ -61,10 +61,10 @@
                         </div>
                         <div class="col-span-5">
                             <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">Jumlah (Qty)</label>
-                            <div class="flex items-center">
-                                <button type="button" onclick="ubahQtyInput(-1)" class="btn btn-soft-secondary px-2.5 py-1 rounded-r-none text-xs font-bold">-</button>
-                                <input type="number" id="inputJumlah" class="form-control text-xs text-center font-bold rounded-none border-x-0" value="1" min="1">
-                                <button type="button" onclick="ubahQtyInput(1)" class="btn btn-soft-secondary px-2.5 py-1 rounded-l-none text-xs font-bold">+</button>
+                            <div class="flex items-center h-[38px] rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs">
+                                <button type="button" onclick="ubahQtyInput(-1)" class="w-10 h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-extrabold text-sm transition-colors cursor-pointer select-none" title="Kurangi Qty">-</button>
+                                <input type="number" id="inputJumlah" class="w-full h-full text-xs font-bold font-mono text-center text-slate-900 dark:text-white bg-transparent border-x border-y-0 border-slate-300 dark:border-slate-600 focus:outline-none no-spinner" value="1" min="1">
+                                <button type="button" onclick="ubahQtyInput(1)" class="w-10 h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-extrabold text-sm transition-colors cursor-pointer select-none" title="Tambah Qty">+</button>
                             </div>
                         </div>
                     </div>
@@ -95,13 +95,13 @@
         <!-- Kolom Kanan: Keranjang Belanja & Pembayaran -->
         <div class="lg:col-span-7 space-y-4">
             <div class="card shadow-sm border border-slate-200/80 dark:border-slate-700 rounded-[14px] overflow-hidden bg-white dark:bg-slate-800">
-                <div class="bg-slate-900 text-white flex items-center justify-between px-4 py-3 font-bold text-xs sm:text-sm">
-                    <div class="flex items-center gap-2">
-                        <i class="bi bi-bag-check-fill text-sky-400 text-base"></i>
+                <div class="bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 py-3 font-bold text-xs sm:text-sm">
+                    <div class="flex items-center gap-2 text-slate-900 dark:text-white">
+                        <i class="bi bi-bag-check-fill text-sky-600 dark:text-sky-400 text-base"></i>
                         <span>Keranjang Belanja</span>
                         <span id="cartCountBadge" class="badge badge-soft-primary badge-xs">0 Item</span>
                     </div>
-                    <button type="button" onclick="kosongkanKeranjang()" class="text-[11px] text-rose-400 hover:text-rose-300 font-normal flex items-center gap-1 cursor-pointer">
+                    <button type="button" onclick="kosongkanKeranjang()" class="text-[11px] text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300 font-semibold flex items-center gap-1 cursor-pointer transition-colors">
                         <i class="bi bi-trash"></i> Kosongkan
                     </button>
                 </div>
@@ -143,9 +143,9 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">Uang Diterima (Tunai)</label>
-                                <div class="relative flex items-center">
-                                    <span class="absolute left-3 text-xs font-bold text-slate-400 pointer-events-none">Rp</span>
-                                    <input type="number" id="inputBayar" class="form-control text-xs font-mono font-bold ps-9 text-slate-900 dark:text-white" placeholder="0" min="0">
+                                <div class="flex items-center h-[38px] rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs focus-within:border-sky-500 focus-within:ring-1 focus-within:ring-sky-500 transition-all">
+                                    <span class="px-3 h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-600 select-none">Rp</span>
+                                    <input type="number" id="inputBayar" class="w-full h-full text-xs font-mono font-bold px-3 text-slate-900 dark:text-white bg-transparent focus:outline-none no-spinner" placeholder="0" min="0">
                                 </div>
                                 <div class="flex flex-wrap gap-1 mt-1.5">
                                     <button type="button" onclick="setNominalBayar('pas')" class="btn btn-soft-secondary py-0.5 px-2 text-[10px] rounded-md">Uang Pas</button>
@@ -371,10 +371,10 @@ function renderCart() {
             <td class="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">${item.text}</td>
             <td class="py-2.5 px-3 text-right text-slate-600 dark:text-slate-400 font-mono">${formatRupiah(item.harga)}</td>
             <td class="py-2.5 px-3 text-center">
-                <div class="inline-flex items-center">
-                    <button type="button" onclick="updateQty(${index}, ${item.qty - 1})" class="btn btn-soft-secondary py-0.5 px-1.5 rounded-r-none text-xs font-bold">-</button>
-                    <input type="number" min="1" value="${item.qty}" onchange="updateQty(${index}, this.value)" class="form-control text-xs text-center py-0.5 px-1 w-12 font-bold rounded-none border-x-0">
-                    <button type="button" onclick="updateQty(${index}, ${item.qty + 1})" class="btn btn-soft-secondary py-0.5 px-1.5 rounded-l-none text-xs font-bold">+</button>
+                <div class="inline-flex items-center h-7 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs">
+                    <button type="button" onclick="updateQty(${index}, ${item.qty - 1})" class="w-6 h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer select-none" title="Kurangi">-</button>
+                    <input type="number" min="1" value="${item.qty}" onchange="updateQty(${index}, this.value)" class="w-11 h-full text-xs font-bold font-mono text-center text-slate-900 dark:text-white bg-transparent border-x border-y-0 border-slate-300 dark:border-slate-600 focus:outline-none no-spinner px-1">
+                    <button type="button" onclick="updateQty(${index}, ${item.qty + 1})" class="w-6 h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors cursor-pointer select-none" title="Tambah">+</button>
                 </div>
             </td>
             <td class="py-2.5 px-3 text-right text-sky-600 dark:text-cyan-400 font-bold font-mono">${formatRupiah(item.subtotal)}</td>
