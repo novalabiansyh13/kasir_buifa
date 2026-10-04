@@ -211,3 +211,37 @@ function validateData(array $tables)
     return $global->validateData($tables);
 }
 
+if (!function_exists('getProductImage')) {
+    function getProductImage(?string $foto, ?int $categoryid = null): string
+    {
+        if (!empty($foto)) {
+            $filePath = FCPATH . 'uploads/produk/' . $foto;
+            if (file_exists($filePath)) {
+                return base_url('uploads/produk/' . $foto);
+            }
+        }
+
+        $categoryMap = [
+            1  => 'cat-sembako.webp',
+            2  => 'cat-snack.webp',
+            3  => 'cat-alat-tulis.webp',
+            4  => 'cat-bumbu-dapur.webp',
+            5  => 'cat-minuman.webp',
+            6  => 'cat-makanan.webp',
+            7  => 'cat-obat.webp',
+            8  => 'cat-perawatan.webp',
+            9  => 'cat-rumah-tangga.webp',
+            10 => 'cat-mainan.webp',
+        ];
+
+        if ($categoryid !== null && isset($categoryMap[$categoryid])) {
+            $catFile = $categoryMap[$categoryid];
+            $catPath = FCPATH . 'images/categories/' . $catFile;
+            if (file_exists($catPath)) {
+                return base_url('images/categories/' . $catFile);
+            }
+        }
+
+        return base_url('images/default-product.webp');
+    }
+}

@@ -6,9 +6,11 @@ use CodeIgniter\Model;
 
 class Globalmodel extends Model
 {
+    protected $DBGroup = 'default';
+
     public static function validateData(array $tables)
     {
-        $db = db_connect();
+        $db = db_connect('default');
         $parts = [];
         foreach ($tables as $t) {
             $alias = $db->escape($t['alias']);

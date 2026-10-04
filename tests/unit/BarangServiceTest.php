@@ -58,4 +58,82 @@ final class BarangServiceTest extends CIUnitTestCase
         $this->expectExceptionMessage('ID barang tidak valid.');
         $service->delete(0);
     }
+
+    public function testStoreWithCustomSatuan(): void
+    {
+        $mockModel = $this->createMock(BarangModel::class);
+        $mockModel->expects($this->once())
+            ->method('store')
+            ->with($this->callback(function ($data) {
+                return isset($data['satuan'])
+                    && $data['satuan'] === 'renteng'
+                    && $data['nama_barang'] === 'Kopi Sachet'
+                    && $data['margin'] == 500;
+            }))
+            ->willReturn(true);
+
+        $mockDb = $this->createMock(\CodeIgniter\Database\BaseConnection::class);
+        $mockDb->method('insertID')->willReturn(101);
+
+        $service = new BarangService($mockModel, $mockDb);
+        $id = $service->store([
+            'categoryid'  => 1,
+            'nama_barang' => 'Kopi Sachet',
+            'harga_beli'  => 1000,
+            'harga_jual'  => 1500,
+            'satuan'      => 'renteng',
+        ]);
+        $this->assertSame(101, $id);
+    }
+
+    public function testStoreDefaultsSatuanToPcsWhenEmpty(): void
+    {
+        $mockModel = $this->createMock(BarangModel::class);
+        $mockModel->expects($this->once())
+            ->method('store')
+            ->with($this->callback(function ($data) {
+                return isset($data['satuan']) && $data['satuan'] === 'pcs';
+            }))
+            ->willReturn(true);
+
+        $mockDb = $this->createMock(\CodeIgniter\Database\BaseConnection::class);
+        $mockDb->method('insertID')->willReturn(102);
+
+        $service = new BarangService($mockModel, $mockDb);
+        $id = $service->store([
+            'categoryid'  => 1,
+            'nama_barang' => 'Gula Pasir',
+            'harga_beli'  => 12000,
+            'harga_jual'  => 14000,
+            'satuan'      => '',
+        ]);
+        $this->assertSame(102, $id);
+    }
+
+    public function testDeleteRemovesPhysicalPhotoFileIfPresent(): void
+    {
+        $photoName = 'test_delete_prod_' . uniqid() . '.webp';
+        $photoPath = FCPATH . 'uploads/produk/' . $photoName;
+        if (!is_dir(dirname($photoPath))) {
+            mkdir(dirname($photoPath), 0755, true);
+        }
+        file_put_contents($photoPath, 'dummy image data');
+        $this->assertFileExists($photoPath);
+
+        $mockModel = $this->createMock(BarangModel::class);
+        $mockModel->method('getOne')->willReturn([
+            'id_barang'   => 55,
+            'nama_barang' => 'Barang Hapus',
+            'foto'        => $photoName,
+        ]);
+        $mockModel->expects($this->once())->method('destroy')->with(55)->willReturn(true);
+
+        $mockDb = $this->createMock(\CodeIgniter\Database\BaseConnection::class);
+
+        $service = new BarangService($mockModel, $mockDb);
+        $result = $service->delete(55);
+
+        $this->assertTrue($result);
+        $this->assertFileDoesNotExist($photoPath);
+    }
 }

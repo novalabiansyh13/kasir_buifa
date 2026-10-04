@@ -1,6 +1,6 @@
 # Backend codebase reference (CodeIgniter 4 POS)
 
-Deep, factual reference for AI agents and developers. Last verified: 2026-09-23.
+Deep, factual reference for AI agents and developers. Last verified: 2026-10-04.
 If you modify code that alters any architecture, models, routes, or services documented here, update this file in the same change.
 Operational instructions and boundaries: [`AGENTS.md`](./AGENTS.md).
 
@@ -176,9 +176,11 @@ kasir-bu-ifa/
 │   ├── css/
 │   │   ├── tailwind.css                               # Compiled Tailwind stylesheet
 │   │   └── template.css                               # Custom application layout styles
-│   ├── images/                                        # Static image assets and default avatars
+│   ├── images/                                        # Static image assets, default avatars, and category WebP defaults
+│   │   └── categories/                                # Default category WebP icons (10 categories)
 │   ├── uploads/
-│   │   └── profile/                                   # Uploaded user avatar images
+│   │   ├── profile/                                   # Uploaded user avatar images
+│   │   └── produk/                                    # Uploaded product WebP images (max 400x400)
 │   └── index.php                                      # Public entry point for HTTP requests
 └── tests/
     ├── database/
@@ -220,7 +222,7 @@ Database name: `kasir_toko` on PostgreSQL.
 - **`mscategory`**: Product category groups.
   - Columns: `categoryid` (SERIAL, PK), `categoryname` (VARCHAR 100), `createddate` (TIMESTAMP), `createdby` (VARCHAR), `updateddate` (TIMESTAMP), `updatedby` (VARCHAR).
 - **`barang`**: Product catalog items.
-  - Columns: `id_barang` (SERIAL, PK), `nama_barang` (VARCHAR 100), `categoryid` (INT, FK to `mscategory.categoryid`), `harga_beli` (NUMERIC 12,2), `harga_jual` (NUMERIC 12,2), `margin` (NUMERIC 12,2, computed as `harga_jual - harga_beli`), `createddate` (TIMESTAMP), `createdby` (VARCHAR), `updateddate` (TIMESTAMP), `updatedby` (VARCHAR).
+  - Columns: `id_barang` (SERIAL, PK), `nama_barang` (VARCHAR 100), `categoryid` (INT, FK to `mscategory.categoryid`), `harga_beli` (NUMERIC 12,2), `harga_jual` (NUMERIC 12,2), `margin` (NUMERIC 12,2, computed as `harga_jual - harga_beli`), `foto` (VARCHAR 255, nullable WebP filename), `satuan` (VARCHAR 20, default `'pcs'`), `createddate` (TIMESTAMP), `createdby` (VARCHAR), `updateddate` (TIMESTAMP), `updatedby` (VARCHAR).
 - **`transaksi`**: Sales transaction header records.
   - Columns: `id_transaksi` (SERIAL, PK), `tanggal_transaksi` (TIMESTAMP DEFAULT CURRENT_TIMESTAMP), `total_bayar` (NUMERIC 12,2), `total_margin` (NUMERIC 12,2).
 - **`detail_transaksi`**: Individual line items for sales transactions.
@@ -325,6 +327,7 @@ Located in `app/Helpers/primary_helper.php`. Loaded automatically or via `helper
 - `idr(float|int $number): string` : Formats numbers into Indonesian Rupiah currency string (e.g. `Rp 25.000`).
 - `idrHTML(float|int $number): string` : Wraps formatted Rupiah inside a span tag.
 - `formatDate(string $format, ?string $date): string` : Formats DateTime string into target layout. Defaults to current timestamp when empty.
+- `getProductImage(?string $foto, ?int $categoryid = null): string` : Resolves public image URL for a product with fallback to category default WebP or global default.
 
 ### AJAX response helper
 - `respondAndDie(bool $status, string $msg): void` : Sets application/json header, outputs standard envelope containing `success`, `msg`, and fresh `csrfToken`, then calls `die;`.

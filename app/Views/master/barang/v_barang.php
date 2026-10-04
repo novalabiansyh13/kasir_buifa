@@ -21,12 +21,14 @@
             <table class="w-full text-xs text-left text-slate-800 dark:text-slate-200 border-collapse table-master" style="width: 100%;">
                 <thead class="bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-xs font-bold border-b border-slate-200 dark:border-slate-700">
                     <tr>
-                        <th class="py-3 px-3 text-center" style="width: 50px;">No</th>
+                        <th class="py-3 px-3 text-center" style="width: 45px;">No</th>
+                        <th class="py-3 px-3 text-center" style="width: 55px;">Foto</th>
                         <th class="py-3 px-3 text-start">Nama Produk</th>
-                        <th class="py-3 px-3 text-center">Kategori</th>
-                        <th class="py-3 px-3 text-end">Harga Beli</th>
-                        <th class="py-3 px-3 text-end">Harga Jual</th>
-                        <th class="py-3 px-3 text-end">Margin Laba</th>
+                        <th class="py-3 px-3 text-center" style="width: 130px;">Kategori</th>
+                        <th class="py-3 px-3 text-center" style="width: 75px;">Satuan</th>
+                        <th class="py-3 px-3 text-end" style="width: 100px;">Harga Beli</th>
+                        <th class="py-3 px-3 text-end" style="width: 100px;">Harga Jual</th>
+                        <th class="py-3 px-3 text-end" style="width: 100px;">Margin Laba</th>
                         <th class="py-3 px-3 text-center" style="width: 90px;">Aksi</th>
                     </tr>
                 </thead>

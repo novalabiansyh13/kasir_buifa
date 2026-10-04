@@ -332,6 +332,9 @@ function tambahItem() {
             id_barang: item.id,
             id: item.id,
             text: item.text,
+            nama_barang: item.nama_barang || item.text,
+            satuan: item.satuan || 'pcs',
+            image_url: item.image_url || '<?= base_url('images/default-product.webp') ?>',
             harga: harga,
             jumlah: qty,
             qty: qty,
@@ -368,7 +371,17 @@ function renderCart() {
         total += item.subtotal;
         totalQty += item.qty;
         var row = `<tr>
-            <td class="py-2.5 px-3 font-semibold text-slate-900 dark:text-white">${item.text}</td>
+            <td class="py-2 px-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 shrink-0 border border-slate-200 dark:border-slate-600 flex items-center justify-center">
+                        <img src="${item.image_url}" alt="${item.nama_barang}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="min-w-0">
+                        <span class="font-bold text-slate-900 dark:text-white block truncate leading-tight">${item.nama_barang}</span>
+                        <span class="text-[10px] text-slate-500 dark:text-slate-400 font-mono">${item.satuan}</span>
+                    </div>
+                </div>
+            </td>
             <td class="py-2.5 px-3 text-right text-slate-600 dark:text-slate-400 font-mono">${formatRupiah(item.harga)}</td>
             <td class="py-2.5 px-3 text-center">
                 <div class="inline-flex items-center h-7 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 overflow-hidden shadow-2xs">

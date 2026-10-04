@@ -51,13 +51,23 @@ class Barang extends BaseController
             $btn_edit = "<button type='button' onclick=\"openModal('Edit Produk', '" . getURL('barang/form/' . encrypting($db->id_barang)) . "', {}, 'max-w-xl')\" class='btn btn-soft-warning w-8 h-8 p-0 rounded-lg text-sm inline-flex items-center justify-center me-1.5 shadow-xs' title='Edit Produk'><i class='bi bi-pencil-square'></i></button>";
             $btn_hapus = "<button type='button' class='btn btn-soft-danger w-8 h-8 p-0 rounded-lg text-sm inline-flex items-center justify-center shadow-xs cursor-pointer' onclick=\"modalDelete('Hapus barang - " . esc($db->nama_barang) . "', {'link':'" . getURL('barang/delete') . "', 'id':'" . encrypting($db->id_barang) . "', 'pagetype':'table'})\" title='Hapus Produk'><i class='bi bi-trash3-fill'></i></button>";
 
+            $imageUrl = getProductImage($db->foto ?? null, !empty($db->categoryid) ? (int) $db->categoryid : null);
+            $thumb = "<div class='w-9 h-9 rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shrink-0 flex items-center justify-center shadow-2xs'>
+                        <img src='{$imageUrl}' alt='" . esc($db->nama_barang) . "' class='w-full h-full object-cover' loading='lazy'>
+                      </div>";
+
             $cat_name = !empty($db->categoryname) ? esc($db->categoryname) : 'Tanpa Kategori';
-            $cat_badge = "<span class='inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-cyan-300 border border-sky-200/80 dark:border-sky-800/60 shadow-2xs'>{$cat_name}</span>";
+            $cat_badge = "<span class='inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-cyan-300 border border-sky-200/80 dark:border-sky-800/60 shadow-2xs'>{$cat_name}</span>";
+
+            $satuan = !empty($db->satuan) ? esc($db->satuan) : 'pcs';
+            $satuan_badge = "<span class='inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600'>{$satuan}</span>";
 
             return [
                 $no,
-                "<span class='font-bold text-slate-900 dark:text-white'>" . esc($db->nama_barang) . "</span>",
+                $thumb,
+                "<span class='font-bold text-slate-900 dark:text-white block'>" . esc($db->nama_barang) . "</span>",
                 $cat_badge,
+                $satuan_badge,
                 "<span class='font-mono text-slate-600 dark:text-slate-400'>" . idr($db->harga_beli) . "</span>",
                 "<span class='font-mono font-bold text-slate-900 dark:text-white'>" . idr($db->harga_jual) . "</span>",
                 "<span class='badge " . ($db->margin >= 0 ? 'badge-soft-success' : 'badge-soft-danger') . " font-mono font-bold'>" . idr($db->margin) . "</span>",
@@ -100,6 +110,8 @@ class Barang extends BaseController
         $nama_barang = $this->getPost('nama_barang');
         $harga_beli = $this->getPost('harga_beli');
         $harga_jual = $this->getPost('harga_jual');
+        $satuan = $this->getPost('satuan');
+        $fileFoto = $this->request->getFile('foto');
 
         try {
             $this->barangService->store([
@@ -107,7 +119,8 @@ class Barang extends BaseController
                 'nama_barang' => $nama_barang,
                 'harga_beli'  => $harga_beli,
                 'harga_jual'  => $harga_jual,
-            ]);
+                'satuan'      => $satuan,
+            ], $fileFoto);
 
             return $this->response->setJSON([
                 'success'   => true,
@@ -149,6 +162,8 @@ class Barang extends BaseController
         $nama_barang = $this->getPost('nama_barang');
         $harga_beli = $this->getPost('harga_beli');
         $harga_jual = $this->getPost('harga_jual');
+        $satuan = $this->getPost('satuan');
+        $fileFoto = $this->request->getFile('foto');
 
         try {
             $this->barangService->update($id, [
@@ -156,7 +171,8 @@ class Barang extends BaseController
                 'nama_barang' => $nama_barang,
                 'harga_beli'  => $harga_beli,
                 'harga_jual'  => $harga_jual,
-            ]);
+                'satuan'      => $satuan,
+            ], $fileFoto);
 
             return $this->response->setJSON([
                 'success'   => true,
@@ -232,12 +248,16 @@ class Barang extends BaseController
         $arr = [];
         foreach ($get as $g) {
             $catLabel = !empty($g['categoryname']) ? ' [' . $g['categoryname'] . ']' : '';
+            $unitLabel = !empty($g['satuan']) ? ' / ' . $g['satuan'] : '';
             $arr[] = [
                 'id'           => (empty($stmt) ? encrypting($g['id_barang']) : $g['id_barang']),
-                'text'         => $g['nama_barang'] . $catLabel,
+                'text'         => $g['nama_barang'] . $unitLabel . $catLabel,
                 'nama_barang'  => $g['nama_barang'],
                 'categoryname' => $g['categoryname'] ?? '',
                 'categoryid'   => $g['categoryid'] ?? '',
+                'satuan'       => $g['satuan'] ?? 'pcs',
+                'foto'         => $g['foto'] ?? null,
+                'image_url'    => getProductImage($g['foto'] ?? null, !empty($g['categoryid']) ? (int) $g['categoryid'] : null),
                 'harga'        => (float) $g['harga_jual'],
                 'margin'       => (float) $g['margin'],
             ];

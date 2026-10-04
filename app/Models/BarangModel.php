@@ -18,8 +18,10 @@ class BarangModel extends Model
     {
         return [
             null,
+            null,
             'a.nama_barang',
             'b.categoryname',
+            'a.satuan',
             'a.harga_beli',
             'a.harga_jual',
             'a.margin',
@@ -78,7 +80,7 @@ class BarangModel extends Model
     {
         $cari = strtolower(trim($search));
         $x = $this->builder
-            ->select('a.id_barang, a.nama_barang, a.harga_beli, a.harga_jual, a.margin, a.categoryid, b.categoryname')
+            ->select('a.id_barang, a.nama_barang, a.harga_beli, a.harga_jual, a.margin, a.categoryid, a.foto, a.satuan, b.categoryname')
             ->join('mscategory as b', 'b.categoryid = a.categoryid', 'left');
 
         if (!empty($categoryid)) {
@@ -93,3 +95,4 @@ class BarangModel extends Model
             ->getResultArray();
     }
 }
+
