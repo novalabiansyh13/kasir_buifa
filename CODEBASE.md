@@ -80,7 +80,7 @@ The codebase is migrating toward a strict three-tier architecture: Controller ->
 | Master | `app/Services/Master/MenuService.php` | Completed | Menu hierarchy, sequence reordering, role access assignment |
 | Master | `app/Services/Master/UserService.php` | Completed | User CRUD, role association, password hashing, avatar handling |
 | Master | `app/Services/Master/UsergroupService.php` | Completed | Role CRUD, menu permission tree assignment |
-| Kasir | `app/Services/Kasir/KasirService.php` | Completed | Validate cart items, calculate subtotals and margins, persist transaction header and detail batch |
+| Kasir | `app/Services/Kasir/KasirService.php` | Completed | Validate cart items, calculate subtotals and margins, persist transaction header and detail batch, serve paginated product catalog for POS cards |
 | Kasir | `app/Services/Kasir/RiwayatTransaksiService.php` | Completed | Date range sanitization, transaction summary metrics, top products aggregation |
 | Dashboard | `app/Services/Dashboard/OmzetService.php` | Completed | Annual turnover calculation, monthly chart generation, category sales rankings |
 
@@ -295,8 +295,9 @@ All route definitions reside in `app/Config/Routes.php`.
 - `GET|POST /menu/getmenu` : Async select options for parent menus (`master\Menu::getMenu`).
 
 ### Kasir & POS terminal routes (filter: `checkAccess`)
-- `GET /kasir` : Main cash register terminal page (`kasir\Kasir::index`).
+- `GET /kasir` : Main cash register terminal page with visual product cards catalog (`kasir\Kasir::index`).
 - `POST /kasir/table` : Recent transactions preview datatable (`kasir\Riwayat::datatable`).
+- `POST /kasir/products` : Paginated visual catalog cards with search and category filtering (`kasir\Kasir::products`).
 - `POST /kasir/simpan` : Processes shopping cart payload and persists sales record (`kasir\Kasir::simpan`).
 
 ### Riwayat Transaksi routes (filter: `checkAccess`)
@@ -327,7 +328,8 @@ Located in `app/Helpers/primary_helper.php`. Loaded automatically or via `helper
 - `idr(float|int $number): string` : Formats numbers into Indonesian Rupiah currency string (e.g. `Rp 25.000`).
 - `idrHTML(float|int $number): string` : Wraps formatted Rupiah inside a span tag.
 - `formatDate(string $format, ?string $date): string` : Formats DateTime string into target layout. Defaults to current timestamp when empty.
-- `getProductImage(?string $foto, ?int $categoryid = null): string` : Resolves public image URL for a product with fallback to category default WebP or global default.
+- `formatRupiah(float|int $nominal = 0): string` : Formats numbers into Indonesian Rupiah currency string with `Rp ` prefix and dot separator (e.g. `Rp 25.000`).
+- `getProductImage(?string $foto, ?int $categoryid = null): string` : Resolves public image URL for a product with fallback to category SVG vector asset or global default SVG.
 
 ### AJAX response helper
 - `respondAndDie(bool $status, string $msg): void` : Sets application/json header, outputs standard envelope containing `success`, `msg`, and fresh `csrfToken`, then calls `die;`.

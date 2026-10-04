@@ -7,13 +7,6 @@ function getURL($param = "")
     return base_url($param);
 }
 
-function getView($url, $datas = [])
-{
-    if (!empty($datas)) $view = view($url, $datas);
-    $view = view($url);
-    return $view;
-}
-
 function sessionMenu($link = '')
 {
     return getAllAccess();
@@ -217,31 +210,38 @@ if (!function_exists('getProductImage')) {
         if (!empty($foto)) {
             $filePath = FCPATH . 'uploads/produk/' . $foto;
             if (file_exists($filePath)) {
-                return base_url('uploads/produk/' . $foto);
+                return base_url('public/uploads/produk/' . $foto);
             }
         }
 
         $categoryMap = [
-            1  => 'cat-sembako.webp',
-            2  => 'cat-snack.webp',
-            3  => 'cat-alat-tulis.webp',
-            4  => 'cat-bumbu-dapur.webp',
-            5  => 'cat-minuman.webp',
-            6  => 'cat-makanan.webp',
-            7  => 'cat-obat.webp',
-            8  => 'cat-perawatan.webp',
-            9  => 'cat-rumah-tangga.webp',
-            10 => 'cat-mainan.webp',
+            1  => 'cat-sembako',
+            2  => 'cat-snack',
+            3  => 'cat-alat-tulis',
+            4  => 'cat-bumbu-dapur',
+            5  => 'cat-minuman',
+            6  => 'cat-makanan',
+            7  => 'cat-obat',
+            8  => 'cat-perawatan',
+            9  => 'cat-rumah-tangga',
+            10 => 'cat-mainan',
         ];
 
         if ($categoryid !== null && isset($categoryMap[$categoryid])) {
-            $catFile = $categoryMap[$categoryid];
-            $catPath = FCPATH . 'images/categories/' . $catFile;
-            if (file_exists($catPath)) {
-                return base_url('images/categories/' . $catFile);
+            $catBase = $categoryMap[$categoryid];
+            $svgPath = FCPATH . 'images/categories/' . $catBase . '.svg';
+            if (file_exists($svgPath)) {
+                return base_url('public/images/categories/' . $catBase . '.svg');
             }
         }
 
-        return base_url('images/default-product.webp');
+        return base_url('public/images/default-product.svg');
+    }
+}
+
+if (!function_exists('formatRupiah')) {
+    function formatRupiah($nominal = 0): string
+    {
+        return idr($nominal);
     }
 }

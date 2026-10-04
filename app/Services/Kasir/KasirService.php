@@ -140,4 +140,53 @@ class KasirService
             throw $e;
         }
     }
+
+    /**
+     * Mengambil daftar produk untuk katalog POS dengan paginasi dan filter server-side.
+     *
+     * @param string|null $search
+     * @param int|null $categoryId
+     * @param int $page
+     * @param int $perPage
+     * @return array
+     */
+    public function getProductsCatalog(?string $search = '', ?int $categoryId = null, int $page = 1, int $perPage = 12): array
+    {
+        $page = max(1, $page);
+        $perPage = max(1, min(100, $perPage));
+
+        $result = $this->getBarangModel()->getPaginated(
+            $search ?? '',
+            $categoryId ? (string) $categoryId : '',
+            $page,
+            $perPage
+        );
+
+        $formatted = [];
+        foreach ($result['rows'] as $row) {
+            $catId = !empty($row['categoryid']) ? (int) $row['categoryid'] : null;
+            $formatted[] = [
+                'id_barang'            => (int) $row['id_barang'],
+                'id_barang_encrypted'  => encrypting($row['id_barang']),
+                'nama_barang'          => $row['nama_barang'],
+                'harga_jual'           => (float) $row['harga_jual'],
+                'harga_jual_formatted' => formatRupiah((float) $row['harga_jual']),
+                'satuan'               => $row['satuan'] ?? 'pcs',
+                'categoryid'           => $catId,
+                'categoryname'         => $row['categoryname'] ?? 'Umum',
+                'foto'                 => $row['foto'] ?? null,
+                'image_url'            => getProductImage($row['foto'] ?? null, $catId),
+            ];
+        }
+
+        $totalPages = $result['total'] > 0 ? (int) ceil($result['total'] / $result['perPage']) : 1;
+
+        return [
+            'data'        => $formatted,
+            'total'       => (int) $result['total'],
+            'page'        => (int) $result['page'],
+            'per_page'    => (int) $result['perPage'],
+            'total_pages' => $totalPages,
+        ];
+    }
 }

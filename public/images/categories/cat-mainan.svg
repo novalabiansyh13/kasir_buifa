@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+    <defs>
+        <linearGradient id="grad_cat-mainan" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fce7f3" />
+            <stop offset="100%" stop-color="#fbcfe8" />
+        </linearGradient>
+    </defs>
+    <!-- Background Canvas -->
+    <rect width="200" height="200" rx="20" fill="url(#grad_cat-mainan)" />
+    <!-- Center Circle Badge -->
+    <circle cx="100" cy="85" r="48" fill="#ffffff" fill-opacity="0.85" />
+    <circle cx="100" cy="85" r="48" fill="none" stroke="#db2777" stroke-width="2.5" stroke-opacity="0.3" />
+    <!-- Vector Icon (Centered & Scaled 4.2x) -->
+    <g transform="translate(66, 51) scale(4.25)" fill="#db2777">
+        <path d="M11.5 6.004a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3m-1 2a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3m2 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3m-1 2a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/><path d="m3.565 6.461 1.77-1.77a2.5 2.5 0 0 0 0-3.535l-.707-.708a2.5 2.5 0 0 0-3.536 0l-.707.708a2.5 2.5 0 0 0 0 3.535l1.77 1.77a.5.5 0 0 0 .708 0zM11.1 9.404l1.77-1.77a2.5 2.5 0 0 1 3.535 0l.708.707a2.5 2.5 0 0 1 0 3.536l-.708.707a2.5 2.5 0 0 1-3.535 0l-1.77-1.77a.5.5 0 0 1 0-.708"/><path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m.5 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1z"/>
+    </g>
+    <!-- Category Label Pill -->
+    <rect x="25" y="152" width="150" height="28" rx="8" fill="#db2777" />
+    <text x="100" y="171" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" letter-spacing="1.2" fill="#ffffff" text-anchor="middle">
+        MAINAN
+    </text>
+</svg>

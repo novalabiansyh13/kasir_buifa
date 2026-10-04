@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+    <defs>
+        <linearGradient id="grad_cat-minuman" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#e0f2fe" />
+            <stop offset="100%" stop-color="#bae6fd" />
+        </linearGradient>
+    </defs>
+    <!-- Background Canvas -->
+    <rect width="200" height="200" rx="20" fill="url(#grad_cat-minuman)" />
+    <!-- Center Circle Badge -->
+    <circle cx="100" cy="85" r="48" fill="#ffffff" fill-opacity="0.85" />
+    <circle cx="100" cy="85" r="48" fill="none" stroke="#0284c7" stroke-width="2.5" stroke-opacity="0.3" />
+    <!-- Vector Icon (Centered & Scaled 4.2x) -->
+    <g transform="translate(66, 51) scale(4.25)" fill="#0284c7">
+        <path fill-rule="evenodd" d="M13.902.334a.5.5 0 0 1-.28.65l-2.254.902a4.46 4.46 0 0 0-.65-.65l2.254-.902a.5.5 0 0 1 .65.28M12.5 3a.5.5 0 0 0 0-1H3.5a.5.5 0 0 0 0 1h.407l1.01 10.106A1.5 1.5 0 0 0 6.41 14.5h3.18a1.5 1.5 0 0 0 1.493-1.394L12.093 3zM4.922 4h6.156l-.86 8.606a.5.5 0 0 1-.498.464h-3.18a.5.5 0 0 1-.498-.464z"/>
+    </g>
+    <!-- Category Label Pill -->
+    <rect x="25" y="152" width="150" height="28" rx="8" fill="#0284c7" />
+    <text x="100" y="171" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" letter-spacing="1.2" fill="#ffffff" text-anchor="middle">
+        MINUMAN
+    </text>
+</svg>

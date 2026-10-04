@@ -889,3 +889,54 @@ html.dark .daterangepicker .drp-buttons .cancelBtn {
     border-color: #475569;
 }
 
+/* POS Specific Layout, Grid, and Sticky Cart Styles */
+.pos-sticky-cart {
+    align-self: flex-start !important;
+}
+
+@media (min-width: 1024px) {
+    .pos-sticky-cart {
+        position: -webkit-sticky !important;
+        position: sticky !important;
+        top: 80px !important;
+        z-index: 30 !important;
+    }
+}
+
+.pos-catalog-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.pos-catalog-grid.hidden,
+#catalogSkeleton.hidden,
+#catalogGrid.hidden {
+    display: none !important;
+}
+
+@media (min-width: 640px) {
+    .pos-catalog-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .pos-catalog-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1280px) {
+    .pos-catalog-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.pos-card-thumb {
+    height: 105px !important;
+    width: 100% !important;
+    object-fit: cover !important;
+}
+
+

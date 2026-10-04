@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+    <defs>
+        <linearGradient id="grad_cat-sembako" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fef3c7" />
+            <stop offset="100%" stop-color="#fde68a" />
+        </linearGradient>
+    </defs>
+    <!-- Background Canvas -->
+    <rect width="200" height="200" rx="20" fill="url(#grad_cat-sembako)" />
+    <!-- Center Circle Badge -->
+    <circle cx="100" cy="85" r="48" fill="#ffffff" fill-opacity="0.85" />
+    <circle cx="100" cy="85" r="48" fill="none" stroke="#d97706" stroke-width="2.5" stroke-opacity="0.3" />
+    <!-- Vector Icon (Centered & Scaled 4.2x) -->
+    <g transform="translate(66, 51) scale(4.25)" fill="#d97706">
+        <path d="M5.757 1.071a.5.5 0 0 1 .172.686L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H.5a.5.5 0 0 1-.5-.5v-1A.5.5 0 0 1 .5 6h1.717L5.07 1.243a.5.5 0 0 1 .687-.172zM3.394 15l-.8-8h10.812l-.8 8a2 2 0 0 1-1.99 1.8H5.384a2 2 0 0 1-1.99-1.8zm4.106-6.5a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 1 0V9a.5.5 0 0 0-.5-.5zm2.5 0a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 1 0V9a.5.5 0 0 0-.5-.5zm-5 0a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 1 0V9a.5.5 0 0 0-.5-.5z"/>
+    </g>
+    <!-- Category Label Pill -->
+    <rect x="25" y="152" width="150" height="28" rx="8" fill="#d97706" />
+    <text x="100" y="171" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" letter-spacing="1.2" fill="#ffffff" text-anchor="middle">
+        SEMBAKO
+    </text>
+</svg>

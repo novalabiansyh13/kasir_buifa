@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+    <defs>
+        <linearGradient id="grad_default" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#f1f5f9" />
+            <stop offset="100%" stop-color="#e2e8f0" />
+        </linearGradient>
+    </defs>
+    <rect width="200" height="200" rx="20" fill="url(#grad_default)" />
+    <circle cx="100" cy="85" r="48" fill="#ffffff" fill-opacity="0.9" />
+    <circle cx="100" cy="85" r="48" fill="none" stroke="#64748b" stroke-width="2.5" stroke-opacity="0.3" />
+    <g transform="translate(66, 51) scale(4.25)" fill="#475569">
+        <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2zm3.564 1.426L5.596 5 8 5.961 14.154 3.5zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923zM7.443.184a1.5 1.5 0 0 1 1.114 0l6.229 2.492a.5.5 0 0 1 .314.464v10.5a.5.5 0 0 1-.314.464L8.557 16.6a1.5 1.5 0 0 1-1.114 0l-6.229-2.492A.5.5 0 0 1 .9 13.642V3.14a.5.5 0 0 1 .314-.464z"/>
+    </g>
+    <rect x="35" y="152" width="130" height="28" rx="8" fill="#475569" />
+    <text x="100" y="171" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" letter-spacing="1.2" fill="#ffffff" text-anchor="middle">
+        PRODUK TOKO
+    </text>
+</svg>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+    <defs>
+        <linearGradient id="grad_cat-rumah-tangga" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#e0e7ff" />
+            <stop offset="100%" stop-color="#c7d2fe" />
+        </linearGradient>
+    </defs>
+    <!-- Background Canvas -->
+    <rect width="200" height="200" rx="20" fill="url(#grad_cat-rumah-tangga)" />
+    <!-- Center Circle Badge -->
+    <circle cx="100" cy="85" r="48" fill="#ffffff" fill-opacity="0.85" />
+    <circle cx="100" cy="85" r="48" fill="none" stroke="#4f46e5" stroke-width="2.5" stroke-opacity="0.3" />
+    <!-- Vector Icon (Centered & Scaled 4.2x) -->
+    <g transform="translate(66, 51) scale(4.25)" fill="#4f46e5">
+        <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM8 3.293l4.717 4.716L12 8.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V8.207l-.717-.717z"/><path d="m8 6.25-.67.67c-.896.896-.896 2.348 0 3.244l.67.67.67-.67c.896-.896.896-2.348 0-3.244z"/>
+    </g>
+    <!-- Category Label Pill -->
+    <rect x="25" y="152" width="150" height="28" rx="8" fill="#4f46e5" />
+    <text x="100" y="171" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" letter-spacing="1.2" fill="#ffffff" text-anchor="middle">
+        RUMAH TANGGA
+    </text>
+</svg>

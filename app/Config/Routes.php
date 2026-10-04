@@ -88,6 +88,7 @@ $routes->group('menu', function ($routes) {
 $routes->group('kasir', function ($routes) {
     $routes->add('', 'kasir\Kasir::index', $this->akses);
     $routes->add('table', 'kasir\Riwayat::datatable', $this->akses);
+    $routes->add('products', 'kasir\Kasir::products', $this->akses);
     $routes->add('simpan', 'kasir\Kasir::simpan', $this->akses);
 });
 

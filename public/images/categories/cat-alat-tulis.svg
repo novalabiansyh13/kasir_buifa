@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+    <defs>
+        <linearGradient id="grad_cat-alat-tulis" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#dbeafe" />
+            <stop offset="100%" stop-color="#bfdbfe" />
+        </linearGradient>
+    </defs>
+    <!-- Background Canvas -->
+    <rect width="200" height="200" rx="20" fill="url(#grad_cat-alat-tulis)" />
+    <!-- Center Circle Badge -->
+    <circle cx="100" cy="85" r="48" fill="#ffffff" fill-opacity="0.85" />
+    <circle cx="100" cy="85" r="48" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-opacity="0.3" />
+    <!-- Vector Icon (Centered & Scaled 4.2x) -->
+    <g transform="translate(66, 51) scale(4.25)" fill="#2563eb">
+        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+    </g>
+    <!-- Category Label Pill -->
+    <rect x="25" y="152" width="150" height="28" rx="8" fill="#2563eb" />
+    <text x="100" y="171" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="800" letter-spacing="1.2" fill="#ffffff" text-anchor="middle">
+        ALAT TULIS
+    </text>
+</svg>

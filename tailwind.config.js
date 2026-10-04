@@ -2,6 +2,8 @@
 module.exports = {
   darkMode: 'class',
   content: [
+    "./app/**/*.{php,html,js}",
+    "./public/**/*.{php,html,js}",
     "./app/Views/**/*.php",
     "./app/Controllers/**/*.php",
     "./app/Helpers/**/*.php",

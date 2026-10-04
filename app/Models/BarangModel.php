@@ -6,11 +6,12 @@ use CodeIgniter\Model;
 
 class BarangModel extends Model
 {
+    protected $DBGroup = 'default';
     protected $table = 'barang as a';
     public function __construct()
     {
         parent::__construct();
-        $this->db = db_connect();
+        $this->db = db_connect($this->DBGroup);
         $this->builder = $this->db->table($this->table);
     }
 
@@ -93,6 +94,46 @@ class BarangModel extends Model
             ->orderBy('a.nama_barang', 'ASC')
             ->get()
             ->getResultArray();
+    }
+
+    public function getPaginated($search = '', $categoryid = '', $page = 1, $perPage = 12)
+    {
+        $cari = strtolower(trim($search));
+        $page = max(1, (int) $page);
+        $perPage = max(1, min(100, (int) $perPage));
+        $offset = ($page - 1) * $perPage;
+
+        $countBuilder = $this->db->table('barang as a')
+            ->join('mscategory as b', 'b.categoryid = a.categoryid', 'left');
+        if (!empty($categoryid)) {
+            $countBuilder->where('a.categoryid', $categoryid);
+        }
+        if ($cari !== '') {
+            $countBuilder->where("(lower(a.nama_barang) like '%" . $cari . "%' or lower(b.categoryname) like '%" . $cari . "%')", null, false);
+        }
+        $total = $countBuilder->countAllResults();
+
+        $dataBuilder = $this->db->table('barang as a')
+            ->select('a.id_barang, a.nama_barang, a.harga_beli, a.harga_jual, a.margin, a.categoryid, a.foto, a.satuan, b.categoryname')
+            ->join('mscategory as b', 'b.categoryid = a.categoryid', 'left');
+        if (!empty($categoryid)) {
+            $dataBuilder->where('a.categoryid', $categoryid);
+        }
+        if ($cari !== '') {
+            $dataBuilder->where("(lower(a.nama_barang) like '%" . $cari . "%' or lower(b.categoryname) like '%" . $cari . "%')", null, false);
+        }
+
+        $rows = $dataBuilder->orderBy('a.nama_barang', 'ASC')
+            ->limit($perPage, $offset)
+            ->get()
+            ->getResultArray();
+
+        return [
+            'total'   => $total,
+            'page'    => $page,
+            'perPage' => $perPage,
+            'rows'    => $rows,
+        ];
     }
 }
 

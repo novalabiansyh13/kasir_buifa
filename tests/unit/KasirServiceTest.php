@@ -80,4 +80,60 @@ final class KasirServiceTest extends CIUnitTestCase
         $this->assertSame(7000.0, $res['total_bayar']);
         $this->assertSame(1000.0, $res['total_margin']);
     }
+
+    public function testGetProductsCatalogReturnsFormattedRowsAndPagination(): void
+    {
+        $testFoto = 'prod_test_pos.webp';
+        $dummyPath = FCPATH . 'uploads/produk/' . $testFoto;
+        if (!is_dir(dirname($dummyPath))) {
+            mkdir(dirname($dummyPath), 0755, true);
+        }
+        file_put_contents($dummyPath, 'test');
+
+        $mockBarang = $this->createMock(BarangModel::class);
+        $mockBarang->expects($this->once())
+            ->method('getPaginated')
+            ->with('indomie', '2', 1, 12)
+            ->willReturn([
+                'total'   => 15,
+                'page'    => 1,
+                'perPage' => 12,
+                'rows'    => [
+                    [
+                        'id_barang'    => 10,
+                        'nama_barang'  => 'Indomie Goreng Spesial',
+                        'harga_beli'   => 3000.0,
+                        'harga_jual'   => 3500.0,
+                        'margin'       => 500.0,
+                        'categoryid'   => 2,
+                        'foto'         => $testFoto,
+                        'satuan'       => 'bungkus',
+                        'categoryname' => 'Makanan Instan',
+                    ]
+                ],
+            ]);
+
+        $service = new KasirService($mockBarang);
+        $result = $service->getProductsCatalog('indomie', 2, 1, 12);
+
+        if (file_exists($dummyPath)) {
+            unlink($dummyPath);
+        }
+
+        $this->assertSame(15, $result['total']);
+        $this->assertSame(1, $result['page']);
+        $this->assertSame(12, $result['per_page']);
+        $this->assertSame(2, $result['total_pages']);
+        $this->assertCount(1, $result['data']);
+
+        $item = $result['data'][0];
+        $this->assertSame(10, $item['id_barang']);
+        $this->assertNotEmpty($item['id_barang_encrypted']);
+        $this->assertSame('Indomie Goreng Spesial', $item['nama_barang']);
+        $this->assertSame(3500.0, $item['harga_jual']);
+        $this->assertSame('Rp 3.500', $item['harga_jual_formatted']);
+        $this->assertSame('bungkus', $item['satuan']);
+        $this->assertSame('Makanan Instan', $item['categoryname']);
+        $this->assertStringContainsString($testFoto, $item['image_url']);
+    }
 }

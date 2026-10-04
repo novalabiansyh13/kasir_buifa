@@ -25,7 +25,7 @@ final class ProductHelperTest extends CIUnitTestCase
         file_put_contents($path, 'dummy content');
 
         $url = getProductImage($foto, 1);
-        $this->assertStringContainsString('uploads/produk/test_sample.webp', $url);
+        $this->assertStringContainsString('public/uploads/produk/test_sample.webp', $url);
 
         if (file_exists($path)) {
             unlink($path);
@@ -35,12 +35,12 @@ final class ProductHelperTest extends CIUnitTestCase
     public function testGetProductImageReturnsCategoryDefaultWhenPhotoEmpty(): void
     {
         $url = getProductImage(null, 1);
-        $this->assertStringContainsString('images/categories/', $url);
+        $this->assertStringContainsString('public/images/categories/', $url);
     }
 
     public function testGetProductImageReturnsFallbackWhenCategoryUnknown(): void
     {
         $url = getProductImage(null, 9999);
-        $this->assertStringContainsString('images/default-product.webp', $url);
+        $this->assertStringContainsString('public/images/default-product.svg', $url);
     }
 }
